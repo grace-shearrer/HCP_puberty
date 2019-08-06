@@ -66,8 +66,6 @@ tablr<-function(Y,x,D){
 
 
 
-
-
 ```{r, echo=FALSE}
 demo_vars<-c("Race","BMI","HbA1C","Menstrual_AgeBegan","Age_in_Yrs","group")
 dems<-d4[demo_vars]
@@ -76,12 +74,12 @@ byGroup<-apply(dems, MARGIN = 2, FUN = tablr, x=dems$group, D=dems)
 t1<-merge(byRace$BMI,byRace$HbA1C,by="test")
 t2<-merge(t1,byRace$Menstrual_AgeBegan,by="test")
 t3<-merge(t2, byRace$Age_in_Yrs, by="test")
-t3
+
 
 s1<-merge(byGroup$BMI,byGroup$HbA1C,by="test")
 s2<-merge(s1,byGroup$Menstrual_AgeBegan,by="test")
 s3<-merge(s2, byGroup$Age_in_Yrs, by="test")
-s3
+
 
 all<-rbind(t3,s3)
 row.names(all)<-all$test
@@ -282,11 +280,25 @@ d4$AoM[d4$Menstrual_AgeBegan>13]<-"late"
 
 summary(as.factor(d4$AoM))
 ```
-## Significant positive AoMxBMI
-12 (visual cortex)->13 (somatosensory - mouth) == V178
+# Significant positive AoMxBMI
+## 12 (visual cortex)->13 (somatosensory - mouth) == V178  
+### IC 12
+![IC12](https://github.com/grace-shearrer/HCP_puberty/blob/master/viz/IC12_gordon.png?raw=true)
+![IC12_sub](https://github.com/grace-shearrer/HCP_puberty/blob/master/viz/IC12_gordon_sub.png?raw=true)
 
+### IC 13
+![IC13](https://github.com/grace-shearrer/HCP_puberty/blob/master/viz/IC13_gordon.png?raw=true)
+![IC13_sub](https://github.com/grace-shearrer/HCP_puberty/blob/master/viz/IC12_gordon_sub.png?raw=true)
 
-3 (visual) -> 6 (cingulo-opercular) == V36
+## 3 (visual) -> 6 (cingulo-opercular) == V36
+### IC 3
+![IC3](https://github.com/grace-shearrer/HCP_puberty/blob/master/viz/IC3_gordon.png?raw=true)
+![IC3_sub](https://github.com/grace-shearrer/HCP_puberty/blob/master/viz/IC3_gordon_sub.png?raw=true)
+
+### IC 6
+![IC6](https://github.com/grace-shearrer/HCP_puberty/blob/master/viz/IC6_gordon.png?raw=true)
+![IC6_sub](https://github.com/grace-shearrer/HCP_puberty/blob/master/viz/IC6_gordon_sub.png?raw=true)
+
 ```{r}
 matrix( as.matrix(img_p[5,1:225]),nrow=15, ncol=15)
 ```
@@ -332,13 +344,13 @@ p1
 # Post hoc analysis of HCP data for puberty paper
 
 
-## nodes of interest 
+## Nodes of interest 
 sig 3->6 == V36
 check 6 -> 3 == V78
 12->13 == V192
 check 13->12 == V178
 
-## control variables
+## Control variables
 Race
 Ethnicity
 Age_in_Yrs
