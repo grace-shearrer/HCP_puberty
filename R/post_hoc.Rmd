@@ -65,7 +65,12 @@ tablr<-function(Y,x,D){
 ```
 
 
+
+
+
 ```{r, echo=FALSE}
+demo_vars<-c("Race","BMI","HbA1C","Menstrual_AgeBegan","Age_in_Yrs","group")
+dems<-d4[demo_vars]
 byRace<-apply(dems, MARGIN = 2, FUN = tablr, x=dems$Race, D=dems)
 byGroup<-apply(dems, MARGIN = 2, FUN = tablr, x=dems$group, D=dems)
 t1<-merge(byRace$BMI,byRace$HbA1C,by="test")
