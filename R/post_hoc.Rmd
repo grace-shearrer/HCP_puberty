@@ -3,9 +3,9 @@ title: "HCP_puberty_ph"
 output: html_document
 ---
 
-#Visualizations in wb_view
-use the test3 file and the test2
-```{r, echo=FALSE}
+# Visualizations in wb_view
+
+```{r, message=FALSE, warning=FALSE}
 library(plyr)
 library(psych)
 library(ggplot2)
@@ -18,16 +18,13 @@ library(dotwhisker)
 library(boot)
 library(knitr)
 library(kableExtra)
+library(ggdag)
 library(mosaic)
-library(gifti)
-#devtools::install_github("muschellij2/cifti")
-library(cifti)
-library(rgl)
-library(matrixStats)
+#devtools::install_github("malcolmbarrett/ggdag")
 ```
 
 ## Loading datasets and combining
-```{r, echo=FALSE}
+```{r, echo=FALSE, warning=FALSE,message=FALSE}
 unres<-read.table("~/Google Drive/HCP_graph/1200/datasets/unrestricted_gshearrer_7_24_2019_11_58_3.csv", header=T, sep=",")
 res<-read.table("~/Google Drive/HCP_graph/1200/datasets/RESTRICTED_gshearrer_4_19_2018_11_33_34.csv", header=T, sep=",")
 interest<-read.table("~/Google Drive/HCP_graph/1200/5000perms/post_hoc/vars_of_interest.csv", sep=",", header=F)
@@ -53,7 +50,7 @@ summary(is.na(d4$V36))
 The missing check is OK. Lines up with imaging data.
 
 
-
+Nice function to make a pretty table
 ```{r}
 tablr<-function(Y,x,D){
   Q<-favstats(Y ~ x, data = D)
@@ -65,8 +62,8 @@ tablr<-function(Y,x,D){
 ```
 
 
-
-```{r, echo=FALSE}
+# Making a nice table
+```{r, warning=FALSE, message=FALSE}
 demo_vars<-c("Race","BMI","HbA1C","Menstrual_AgeBegan","Age_in_Yrs","group")
 dems<-d4[demo_vars]
 byRace<-apply(dems, MARGIN = 2, FUN = tablr, x=dems$Race, D=dems)
@@ -91,7 +88,7 @@ all<-all[ , !(names(all) %in% drops)]
 
 
 
-
+# Make the nice table
 ```{r}
 kable(all, format = "html",  col.names = c("n","mean","SD",
                                            "n","mean","SD",
@@ -104,7 +101,7 @@ kable(all, format = "html",  col.names = c("n","mean","SD",
 
 ```
 
-## Summary of main findings
+# Summary of main findings
 Earlier onset of puberty significantly related to heavier adult BMI.
 ```{r}
 ggplot(d4, aes(Menstrual_AgeBegan, BMI)) +
@@ -134,12 +131,12 @@ Age of menstration is significantly related to adult BMI. This relationship rema
 
 
 
-### Quick matrix to remember which variable is which in netmat
-```{r}
+```{r, eval=FALSE, echo=FALSE}
 x<-(1:225)
 B = matrix( x,nrow=15, ncol=15)
 ```
-## Imaging data
+
+# Imaging data
 ```{r}
 img<-read.table("~/Google Drive/HCP_graph/1200/5000perms/p_corrected.csv", sep=",", header=F)
 row.names(img)<-c("<BMI",">BMI","<AoM",">AoM","<AoMxBMI",">AoMxBMI")
@@ -149,7 +146,8 @@ img_p<-1-img
 bool<-img_p<0.05
 img_p[img_p > 0.05] <- NA
 ```
-### Significant positive BMI
+
+# Significant positive BMI
 5->7 == V67
 5->10 == V70
 9->11 == V131
@@ -191,11 +189,8 @@ ggarrange(p1,p2,p3,p4 + rremove("x.text"),
           labels = c("A", "B", "C","D"),
           ncol = 2, nrow = 2)
 ```
-```{r, echo=FALSE}
-B
-```
 
-## Significant negative BMI
+# Significant negative BMI
 1->6 == V6
 3->4 == V34
 4->8 == V53
@@ -239,11 +234,10 @@ ggarrange(p1,p2,p3,p4 + rremove("x.text"),
           labels = c("A", "B", "C","D"),
           ncol = 2, nrow = 2)
 ```
-```{r, echo=FALSE}
-B
-```
-## Significant positive AoM
+
+# Significant positive AoM
 12->15 == V180
+
 ```{r}
 matrix( as.matrix(img_p[3,1:225]),nrow=15, ncol=15)
 ```
@@ -259,14 +253,12 @@ p1<-ggplot(d4, aes(Menstrual_AgeBegan, V180)) +
 p1
 ```
 
-## Significant negative AoM
+# Significant negative AoM
 none
 ```{r}
 matrix( as.matrix(img_p[4,1:225]),nrow=15, ncol=15)
 ```
-```{r, echo=FALSE}
-B
-```
+
 # Tertiles
 So we can visualize the interaction effect
 ```{r}
@@ -324,9 +316,17 @@ ggarrange(p1,p2 ,
           ncol = 2, nrow = 1)
 ```
 
-## Significant negative AoMxBMI
+# Significant negative AoMxBMI
 2 (DMN) ->3 (visual) == V18
-We have a significant connection between IC3 and IC6 and I12 and I13
+### IC 2
+![IC2](https://github.com/grace-shearrer/HCP_puberty/blob/master/viz/IC2_gordon.png?raw=true)
+![IC2_sub](https://github.com/grace-shearrer/HCP_puberty/blob/master/viz/IC2_gordon_sub.png?raw=true)
+
+### IC 3
+![IC3](https://github.com/grace-shearrer/HCP_puberty/blob/master/viz/IC3_gordon.png?raw=true)
+![IC3_sub](https://github.com/grace-shearrer/HCP_puberty/blob/master/viz/IC3_gordon_sub.png?raw=true)
+
+
 ```{r}
 matrix( as.matrix(img_p[6,1:225]),nrow=15, ncol=15)
 ```
@@ -342,7 +342,6 @@ p1
 ```
 
 # Post hoc analysis of HCP data for puberty paper
-
 
 ## Nodes of interest 
 sig 3->6 == V36
@@ -365,10 +364,6 @@ dwplot(list(ctrl1, ctrl2), vline = geom_vline(xintercept = 0, colour = "grey60",
 ```
 
 Looks like I can drop ethnicity since it is not related to either BMI nor Puberty.
-
-```{r}
-summary(d4$Race)
-```
 
 # False Discovery Correction 
 Bonferroni
@@ -397,12 +392,13 @@ p.adjust(coef(summary(mDD2))[, 4], method="BH", ad)
 mSM1<-lm(PicSeq_AgeAdj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
 summary(mSM1)
 ```
+
 # NIH Toolbox Dimensional Change Card Sort Test: Age-Adjusted Scale Score
 ```{r}
 mCS1<-lm(CardSort_AgeAdj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
 summary(mCS1)
-
 ```
+
 # NIH Toolbox Flanker Inhibitory Control and Attention Test: Age-Adjusted Scale Score
 ```{r}
 mFl1<-lm(Flanker_AgeAdj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
@@ -440,8 +436,31 @@ ggplot(subset(d4, !is.na(AoM)), aes(BMI, CogCrystalComp_AgeAdj, color=AoM, group
   theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
 ```
 
-
 # Mediation?
+The DAG is mostly descriptive as the cross-sectional nature of data doesn't allow causal modeling
+```{r}
+#AoMBMI_dag <- dagify(CogCrystalComp_AgeAdj~V178,
+#                      CogCrystalComp_AgeAdj~BMI+Menstrual_AgeBegan+V178,
+#                      CogCrystalComp_AgeAdj~BMI+Menstrual_AgeBegan,
+#                      CogCrystalComp_AgeAdj~BMI,
+#                      CogCrystalComp_AgeAdj~Menstrual_AgeBegan,
+#                      Menstrual_AgeBegan~Race,
+#                      V178~BMI+Menstrual_AgeBegan,
+#                      BMI~Menstrual_AgeBegan+Age_in_Yrs,
+#                      labels = c("Menstrual_AgeBegan" = "Age at onset of menses",
+#                                 "BMI" = "BMI",
+#                                 "CogCrystalComp_AgeAdj" = "Cognition Crystallized Composite\n age adjusted",
+#                                 "Age_in_Yrs" = "Age",
+#                                 "Race" = "Race",
+#                                 "V178" = "Functional connectivity\n between IC12 and IC13"),
+#                      latent = "BMI",
+#                      exposure = "Menstrual_AgeBegan",
+#                      outcome = "CogCrystalComp_AgeAdj")
+
+#ggdag(AoMBMI_dag, text = FALSE, use_labels = "label")
+```
+
+
 ## Baron and Kenny
 ```{r}
 mCCr2<-lm(CogCrystalComp_AgeAdj~V178+Race+Age_in_Yrs, data = d4)
@@ -472,10 +491,8 @@ ggplot(subset(d4, !is.na(AoM)), aes(BMI, V178, color=AoM, group=AoM)) +
   theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
 ```
 
-Partial mediation, uncertain
-Probably nothing because the correction for multiple comparisons 
-The regression coefficient for the indirect effect represents the
-change in Y for every unit change in X that is mediated by M.
+Partial mediation  
+Probably nothing because the correction for multiple comparisons  
 
 ## Sobel product of coefficients 
 ```{r}
@@ -525,6 +542,7 @@ summary(mHb1)
 mEn1<-lm(Endurance_AgeAdj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
 summary(mEn1)
 ```
+
 # NIH Toolbox Grip Strength Test: Age-Adjusted-Adjusted Scale Score	Motor	Strength (Grip Strength Dynamometry)	Strength_AgeAdj
 ```{r}
 mSt1<-lm(Strength_AgeAdj ~ BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
@@ -536,36 +554,18 @@ summary(mSt1)
 mStress1<-lm(PercStress_Unadj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
 summary(mStress1)
 ```
+
 # NIH Toolbox Cognition Total Composite Score: Age Adjusted Scale Score
 ```{r}
 mTCog1<-lm(CogTotalComp_AgeAdj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
 summary(mTCog1)
 ```
 
-#Taste_AgeAdj
+# Taste_AgeAdj
 ```{r}
 mTaste1<-lm(Taste_AgeAdj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
 summary(mTaste1)
 ```
-# PLOTS
-```{r}
-ggplot(d4, aes(BMI, V36)) +
-  geom_point(shape=1) + 
-  geom_smooth(method=lm)
-
-```
-
-```{r}
-ggplot(d4, aes(Menstrual_AgeBegan, V36)) +
-  geom_point(shape=1) + 
-  geom_smooth(method=lm)
-```
 
 
-
-
-
-```{r}
-#write.table(d4, "~/Google Drive/HCP_graph/1200/datasets/post_hoc2.csv",  sep=",")
-```
 
