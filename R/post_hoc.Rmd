@@ -1,0 +1,554 @@
+---
+title: "HCP_puberty_ph"
+output: html_document
+---
+
+#Visualizations in wb_view
+use the test3 file and the test2
+```{r, echo=FALSE}
+library(plyr)
+library(psych)
+library(ggplot2)
+library(Hmisc)
+library(stats)
+library(lm.beta)
+library(lmtest)
+library(ggpubr)
+library(dotwhisker)
+library(boot)
+library(knitr)
+library(kableExtra)
+library(mosaic)
+library(gifti)
+#devtools::install_github("muschellij2/cifti")
+library(cifti)
+library(rgl)
+library(matrixStats)
+```
+
+## Loading datasets and combining
+```{r, echo=FALSE}
+unres<-read.table("~/Google Drive/HCP_graph/1200/datasets/unrestricted_gshearrer_7_24_2019_11_58_3.csv", header=T, sep=",")
+res<-read.table("~/Google Drive/HCP_graph/1200/datasets/RESTRICTED_gshearrer_4_19_2018_11_33_34.csv", header=T, sep=",")
+interest<-read.table("~/Google Drive/HCP_graph/1200/5000perms/post_hoc/vars_of_interest.csv", sep=",", header=F)
+glm<-read.table("~/Google Drive/HCP_graph/1200/5000perms/glm.txt", sep="\t", header=F)
+
+names(glm)<-c("Subject", "group","BMI_C","AOM_C","int","race","age")
+subs<-read.table("~/Google Drive/HCP_graph/1200/datasets/subjectIDs.txt", header=F, sep=" ")
+names(subs)<-"Subject"
+netmat<-read.table("~/Google Drive/HCP_graph/1200/datasets/3T_HCP1200_MSMAll_d15_ts2_nets/netmats1.txt", header=F, sep=" ")
+
+NM<-cbind(subs,netmat)
+
+d0<-join(unres, res)
+d1<-join(d0,glm)
+
+d2<-d1[,colnames(d1)%in%interest$V1] 
+
+d3<-join(d2,NM)
+
+d4<-subset(d3, d3$group == 1)
+summary(is.na(d4$V36))
+```
+The missing check is OK. Lines up with imaging data.
+
+
+
+```{r}
+tablr<-function(Y,x,D){
+  Q<-favstats(Y ~ x, data = D)
+  Q.stat <- Q[, c("x", "n", "mean", "sd")] 
+  colnames(Q.stat)<-c("test","n", "mean", "sd")
+  a<-match.call()[2]
+  return(Q.stat)
+}
+```
+
+
+```{r, echo=FALSE}
+byRace<-apply(dems, MARGIN = 2, FUN = tablr, x=dems$Race, D=dems)
+byGroup<-apply(dems, MARGIN = 2, FUN = tablr, x=dems$group, D=dems)
+t1<-merge(byRace$BMI,byRace$HbA1C,by="test")
+t2<-merge(t1,byRace$Menstrual_AgeBegan,by="test")
+t3<-merge(t2, byRace$Age_in_Yrs, by="test")
+t3
+
+s1<-merge(byGroup$BMI,byGroup$HbA1C,by="test")
+s2<-merge(s1,byGroup$Menstrual_AgeBegan,by="test")
+s3<-merge(s2, byGroup$Age_in_Yrs, by="test")
+s3
+
+all<-rbind(t3,s3)
+row.names(all)<-all$test
+row.names(all)<-c("Native American", "Asian, Native Hawaiian, or Pacific Islander","Black or African American","More than one race","Unknown or chose not to report","White","Total")
+
+drops <- c("test")
+all<-all[ , !(names(all) %in% drops)]
+```
+
+
+
+
+```{r}
+kable(all, format = "html",  col.names = c("n","mean","SD",
+                                           "n","mean","SD",
+                                           "n","mean","SD",
+                                           "n","mean","SD"),
+      caption = "Table 1: Descriptive statistics by reported race",
+      digits = c(0, 3, 3, 0, 3, 3,0, 3, 3,0, 3, 3), align = "ccrr") %>%
+  kable_styling(full_width = FALSE, position = "left") %>%
+  add_header_above(c(" " = 1,"BMI"= 3,"HbA1C"= 3,"Age of menses onset"=3,"Age at scan"=3))
+
+```
+
+## Summary of main findings
+Earlier onset of puberty significantly related to heavier adult BMI.
+```{r}
+ggplot(d4, aes(Menstrual_AgeBegan, BMI)) +
+  geom_point(shape=1) + 
+  geom_smooth(method=lm,colour='black')+theme_classic()+scale_y_continuous(name="Body Mass Index (BMI)")+
+  scale_x_continuous(name="Age of onset of menstration")+
+  theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
+  theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
+
+```
+
+```{r}
+m1<-lm( BMI ~  Menstrual_AgeBegan, data=d4)
+summary(m1)
+m2<-lm( BMI ~  Menstrual_AgeBegan+Age_in_Yrs, data=d4)
+lrtest(m1,m2)
+summary(m2)
+m3<-lm( BMI ~  Menstrual_AgeBegan+Age_in_Yrs+Race, data=d4)
+lrtest(m2,m3)
+summary(m3)
+lm.beta(m3)
+```
+## Summary
+Age of menstration is significantly related to adult BMI. This relationship remains significant with the addition of age and race in the model. Both age and race improve the model fit.
+
+
+
+
+
+### Quick matrix to remember which variable is which in netmat
+```{r}
+x<-(1:225)
+B = matrix( x,nrow=15, ncol=15)
+```
+## Imaging data
+```{r}
+img<-read.table("~/Google Drive/HCP_graph/1200/5000perms/p_corrected.csv", sep=",", header=F)
+row.names(img)<-c("<BMI",">BMI","<AoM",">AoM","<AoMxBMI",">AoMxBMI")
+# head(img)
+img_p<-1-img
+# head(img_p)
+bool<-img_p<0.05
+img_p[img_p > 0.05] <- NA
+```
+### Significant positive BMI
+5->7 == V67
+5->10 == V70
+9->11 == V131
+10->13 == V148
+14->12 == V207
+```{r}
+matrix( as.matrix(img_p[1,1:225]),nrow=15, ncol=15)
+```
+```{r}
+p1<-ggplot(d4, aes(BMI, V67)) +
+  geom_point(shape=1) + 
+  geom_smooth(method=lm)+scale_y_continuous(name="5 and 7")+
+  scale_x_continuous(name="BMI")+
+  theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
+  theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
+
+p2<-ggplot(d4, aes(BMI, V70)) +
+  geom_point(shape=1) + 
+  geom_smooth(method=lm)+scale_y_continuous(name="5 and 10")+
+  scale_x_continuous(name="BMI")+
+  theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
+  theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
+
+p3<-ggplot(d4, aes(BMI, V131)) +
+  geom_point(shape=1) + 
+  geom_smooth(method=lm)+scale_y_continuous(name="9 and 11")+
+  scale_x_continuous(name="BMI")+
+  theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
+  theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
+
+p4<-ggplot(d4, aes(BMI, V148)) +
+  geom_point(shape=1) + 
+  geom_smooth(method=lm)+scale_y_continuous(name="10 and 13")+
+  scale_x_continuous(name="BMI")+
+  theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
+  theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
+
+ggarrange(p1,p2,p3,p4 + rremove("x.text"), 
+          labels = c("A", "B", "C","D"),
+          ncol = 2, nrow = 2)
+```
+```{r, echo=FALSE}
+B
+```
+
+## Significant negative BMI
+1->6 == V6
+3->4 == V34
+4->8 == V53
+4->15 == V60
+10->12 == V147
+10->15 == V150
+```{r}
+matrix( as.matrix(img_p[2,1:225]),nrow=15, ncol=15)
+```
+
+```{r}
+p1<-ggplot(d4, aes(BMI, V6)) +
+  geom_point(shape=1) + 
+  geom_smooth(method=lm)+scale_y_continuous(name="1 and 6")+
+  scale_x_continuous(name="BMI")+
+  theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
+  theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
+
+p2<-ggplot(d4, aes(BMI, V34)) +
+  geom_point(shape=1) + 
+  geom_smooth(method=lm)+scale_y_continuous(name="3 and 4")+
+  scale_x_continuous(name="BMI")+
+  theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
+  theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
+
+p3<-ggplot(d4, aes(BMI, V53)) +
+  geom_point(shape=1) + 
+  geom_smooth(method=lm)+scale_y_continuous(name="4 and 8")+
+  scale_x_continuous(name="BMI")+
+  theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
+  theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
+
+p4<-ggplot(d4, aes(BMI, V60)) +
+  geom_point(shape=1) + 
+  geom_smooth(method=lm)+scale_y_continuous(name="4 and 15")+
+  scale_x_continuous(name="BMI")+
+  theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
+  theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
+
+ggarrange(p1,p2,p3,p4 + rremove("x.text"), 
+          labels = c("A", "B", "C","D"),
+          ncol = 2, nrow = 2)
+```
+```{r, echo=FALSE}
+B
+```
+## Significant positive AoM
+12->15 == V180
+```{r}
+matrix( as.matrix(img_p[3,1:225]),nrow=15, ncol=15)
+```
+
+```{r}
+p1<-ggplot(d4, aes(Menstrual_AgeBegan, V180)) +
+  geom_point(shape=1) + 
+  geom_smooth(method=lm)+scale_y_continuous(name="12 and 15")+
+  scale_x_continuous(name="AoM")+
+  theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
+  theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
+
+p1
+```
+
+## Significant negative AoM
+none
+```{r}
+matrix( as.matrix(img_p[4,1:225]),nrow=15, ncol=15)
+```
+```{r, echo=FALSE}
+B
+```
+# Tertiles
+So we can visualize the interaction effect
+```{r}
+describe(d4$Menstrual_AgeBegan)
+hist(d4$Menstrual_AgeBegan)
+
+quantile(d4$Menstrual_AgeBegan, prob = c(0.33, 0.66))
+
+d4$AoM[d4$Menstrual_AgeBegan<12]<-"early"
+d4$AoM[d4$Menstrual_AgeBegan>13]<-"late"
+
+summary(as.factor(d4$AoM))
+```
+## Significant positive AoMxBMI
+12 (visual cortex)->13 (somatosensory - mouth) == V178
+
+
+3 (visual) -> 6 (cingulo-opercular) == V36
+```{r}
+matrix( as.matrix(img_p[5,1:225]),nrow=15, ncol=15)
+```
+
+```{r}
+p1<-ggplot(subset(d4, !is.na(d4$AoM)), aes(BMI, V36, group=AoM, color=AoM)) +
+  geom_point(shape=1) + 
+  geom_smooth(method=lm)+scale_y_continuous(name="3 and 6")+
+  scale_x_continuous(name="BMI")+
+  theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
+  theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
+
+p2<-ggplot(subset(d4, !is.na(d4$AoM)), aes(BMI, V178, group=AoM,color=AoM)) +
+  geom_point(shape=1) + 
+  geom_smooth(method=lm)+scale_y_continuous(name="12 and 13")+
+  scale_x_continuous(name="BMI")+
+  theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
+  theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
+
+
+ggarrange(p1,p2 , 
+          labels = c("A", "B"),
+          ncol = 2, nrow = 1)
+```
+
+## Significant negative AoMxBMI
+2 (DMN) ->3 (visual) == V18
+We have a significant connection between IC3 and IC6 and I12 and I13
+```{r}
+matrix( as.matrix(img_p[6,1:225]),nrow=15, ncol=15)
+```
+```{r}
+p1<-ggplot(subset(d4, !is.na(d4$AoM)), aes(BMI, V18, group=AoM, color=AoM)) +
+  geom_point(shape=1) + 
+  geom_smooth(method=lm)+scale_y_continuous(name="2 and 3")+
+  scale_x_continuous(name="BMI")+
+  theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
+  theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
+
+p1
+```
+
+# Post hoc analysis of HCP data for puberty paper
+
+
+## nodes of interest 
+sig 3->6 == V36
+check 6 -> 3 == V78
+12->13 == V192
+check 13->12 == V178
+
+## control variables
+Race
+Ethnicity
+Age_in_Yrs
+```{r}
+ctrl1<-lm(BMI~Race+Ethnicity+Age_in_Yrs, data=d4)
+p.adjust(coef(summary(ctrl1))[, 4], method="BH")
+ctrl2<-lm(Menstrual_AgeBegan~Race+Ethnicity+Age_in_Yrs, data=d4)
+p.adjust(coef(summary(ctrl2))[, 4], method="BH")
+
+
+dwplot(list(ctrl1, ctrl2), vline = geom_vline(xintercept = 0, colour = "grey60", linetype = 2))+theme_classic()
+```
+
+Looks like I can drop ethnicity since it is not related to either BMI nor Puberty.
+
+```{r}
+summary(d4$Race)
+```
+
+# False Discovery Correction 
+Bonferroni
+Cor #: 11
+```{r}
+ad = 11
+```
+
+
+# Delay Discounting: Area Under the Curve for Discounting of $200 (DDisc_AUC_200)	Cognition	Self-regulation/Impulsivity (Delay Discounting)	DDisc_AUC_200
+```{r}
+mDD1<-lm(DDisc_AUC_200~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
+summary(mDD1)
+```
+
+# Delay Discounting: Area Under the Curve for Discounting of $40,000 (DDisc_AUC_40K)	Cognition	Self-regulation/Impulsivity (Delay Discounting)	DDisc_AUC_40K
+```{r}
+mDD2<-lm(DDisc_AUC_40K~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
+summary(mDD2)#trend
+p.adjust(coef(summary(mDD2))[, 4], method="BH", ad)
+```
+
+
+# NIH Toolbox Picture Sequence Memory Test: Age-Adjusted Scale Score
+```{r}
+mSM1<-lm(PicSeq_AgeAdj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
+summary(mSM1)
+```
+# NIH Toolbox Dimensional Change Card Sort Test: Age-Adjusted Scale Score
+```{r}
+mCS1<-lm(CardSort_AgeAdj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
+summary(mCS1)
+
+```
+# NIH Toolbox Flanker Inhibitory Control and Attention Test: Age-Adjusted Scale Score
+```{r}
+mFl1<-lm(Flanker_AgeAdj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
+summary(mFl1)
+```
+
+# NIH Toolbox Cognition Fluid Composite: Age Adjusted Scale Score
+```{r}
+mCF1<-lm(CogFluidComp_AgeAdj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
+summary(mCF1)
+```
+
+# NIH Toolbox Cognition Total Composite Score: Age Adjusted Scale Score
+```{r}
+mCCom1<-lm(CogTotalComp_AgeAdj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
+summary(mCCom1)
+```
+
+
+# NIH Toolbox Cognition Crystallized Composite: Age Adjusted Scale Score
+## About 
+The Crystallized Cognition Composite score is derived by averaging the normalized scores of each of the Toolbox tests that are crystallized measures (Picture Vocabulary and Reading Tests), then deriving scale scores based on this new distribution. One can interpret the Crystallized Cognition Composite as a more global assessment of individual and group verbal reasoning. Higher scores indicate higher levels of functioning. Age-adjusted Scale Score: Participant score is normed using the age appropriate band of Toolbox Norming Sample (bands of ages 18-29, or 30-35), where a score of 100 indicates performance that was at the national average and a score of 115 or 85, indicates performance 1 SD above or below the national average for participants age band.
+```{r}
+mCCr1<-lm(CogCrystalComp_AgeAdj~log10(BMI)*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
+summary(mCCr1) #SIGNIFICANT
+### it appears that race only improves the model for Asian therefore we will test this without the asian population which is low (36)
+p.adjust(coef(summary(mCCr1))[, 4], method="BH", ad)
+```
+```{r}
+ggplot(subset(d4, !is.na(AoM)), aes(BMI, CogCrystalComp_AgeAdj, color=AoM, group=AoM)) +
+  geom_point(shape=1) + 
+  geom_smooth(method=lm)+scale_y_continuous(name="crystal cognition")+
+  scale_x_continuous(name="BMI")+
+  theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
+  theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
+```
+
+
+# Mediation?
+## Baron and Kenny
+```{r}
+mCCr2<-lm(CogCrystalComp_AgeAdj~V178+Race+Age_in_Yrs, data = d4)
+summary(mCCr2) #trend
+p.adjust(coef(summary(mCCr2))[, 4], method="BH", ad)
+```
+```{r}
+ggplot(subset(d4, !is.na(AoM)), aes(V178, CogCrystalComp_AgeAdj, color=AoM, group=AoM)) +
+  geom_point(shape=1) + 
+  geom_smooth(method=lm)+scale_y_continuous(name="crystal cognition")+
+  scale_x_continuous(name="connectivity")+
+  theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
+  theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
+```
+
+```{r}
+mCCr2.1<-lm(CogCrystalComp_AgeAdj~log10(BMI)*Menstrual_AgeBegan+V178+Race+Age_in_Yrs, data = d4)
+summary(mCCr2.1)
+p.adjust(coef(summary(mCCr2.1))[, 4], method="BH", ad)
+lm.beta(mCCr2.1)
+```
+```{r}
+ggplot(subset(d4, !is.na(AoM)), aes(BMI, V178, color=AoM, group=AoM)) +
+  geom_point(shape=1) + 
+  geom_smooth(method=lm)+scale_y_continuous(name="connectivity")+
+  scale_x_continuous(name="BMI")+
+  theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
+  theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
+```
+
+Partial mediation, uncertain
+Probably nothing because the correction for multiple comparisons 
+The regression coefficient for the indirect effect represents the
+change in Y for every unit change in X that is mediated by M.
+
+## Sobel product of coefficients 
+```{r}
+mCCr4<-lm(CogCrystalComp_AgeAdj~BMI*Menstrual_AgeBegan+V178+Race+Age_in_Yrs, data = d4)
+summary(mCCr4)
+plot(mCCr4)
+mCCr5<-lm(V178~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data=d4)
+summary(mCCr5)
+ind2<--0.38462*0.05209
+ind2
+```
+# Bootstrapping the sobel method
+
+model 1 CogCrystalComp_AgeAdj~BMI*Menstrual_AgeBegan+V178
+
+model 2 V178~BMI*Menstrual_AgeBegan
+
+```{r}
+rsq <- function(formula1,formula2, data, indices) {
+  d <- data[indices,] # allows boot to select sample 
+  M1 <- lm(formula1, data=d)
+  M2 <- lm(formula2, data=d)
+  B_ind <- coef(M1)[4]*coef(M2)[4]
+  return(B_ind)
+} 
+# bootstrapping with 100000 replications 
+#results <- boot(data=d4, statistic=rsq, 
+#   R=100000, formula1=CogCrystalComp_AgeAdj~BMI*Menstrual_AgeBegan+V178+Race+Age_in_Yrs,
+#   formula2=V178~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs)
+
+# view results
+#results 
+#plot(results)
+
+# get 95% confidence interval 
+#boot.ci(results, type="bca")
+```
+
+# HbA1c
+```{r}
+mHb1<-lm(HbA1C~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
+summary(mHb1)
+```
+
+# NIH Toolbox 2-minute Walk Endurance Test : Age-Adjusted Scale Score	Motor	Endurance (2 minute walk test)	Endurance_AgeAdj
+```{r}
+mEn1<-lm(Endurance_AgeAdj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
+summary(mEn1)
+```
+# NIH Toolbox Grip Strength Test: Age-Adjusted-Adjusted Scale Score	Motor	Strength (Grip Strength Dynamometry)	Strength_AgeAdj
+```{r}
+mSt1<-lm(Strength_AgeAdj ~ BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
+summary(mSt1)
+```
+
+# NIH Toolbox Perceived Stress Survey: Unadjusted Scale Score	Emotion	Stress and Self Efficacy (Perceived Stress, Self-Efficacy)	PercStress_Unadj
+```{r}
+mStress1<-lm(PercStress_Unadj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
+summary(mStress1)
+```
+# NIH Toolbox Cognition Total Composite Score: Age Adjusted Scale Score
+```{r}
+mTCog1<-lm(CogTotalComp_AgeAdj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
+summary(mTCog1)
+```
+
+#Taste_AgeAdj
+```{r}
+mTaste1<-lm(Taste_AgeAdj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
+summary(mTaste1)
+```
+# PLOTS
+```{r}
+ggplot(d4, aes(BMI, V36)) +
+  geom_point(shape=1) + 
+  geom_smooth(method=lm)
+
+```
+
+```{r}
+ggplot(d4, aes(Menstrual_AgeBegan, V36)) +
+  geom_point(shape=1) + 
+  geom_smooth(method=lm)
+```
+
+
+
+
+
+```{r}
+#write.table(d4, "~/Google Drive/HCP_graph/1200/datasets/post_hoc2.csv",  sep=",")
+```
+
