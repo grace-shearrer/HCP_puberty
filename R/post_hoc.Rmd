@@ -1,6 +1,8 @@
 ---
 title: "HCP_puberty_ph"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 # Visualizations in wb_view
@@ -20,7 +22,15 @@ library(knitr)
 library(kableExtra)
 library(ggdag)
 library(mosaic)
+library(mets)
+library(xtable)
+library(stargazer)
+library(yhat)
+library(tidyverse)
+library(broom)
 #devtools::install_github("malcolmbarrett/ggdag")
+#devtools::install_github("kkholst/lava")  
+#devtools::install_github("kkholst/mets")  
 ```
 
 ## Loading datasets and combining
@@ -41,11 +51,11 @@ d0<-join(unres, res)
 d1<-join(d0,glm)
 
 d2<-d1[,colnames(d1)%in%interest$V1] 
-
 d3<-join(d2,NM)
 
 d4<-subset(d3, d3$group == 1)
 summary(is.na(d4$V36))
+d4<-d4[!is.na(d4$V36),]
 ```
 The missing check is OK. Lines up with imaging data.
 
@@ -66,6 +76,7 @@ tablr<-function(Y,x,D){
 ```{r, warning=FALSE, message=FALSE}
 demo_vars<-c("Race","BMI","HbA1C","Menstrual_AgeBegan","Age_in_Yrs","group")
 dems<-d4[demo_vars]
+#dems<-na.omit(dems)
 byRace<-apply(dems, MARGIN = 2, FUN = tablr, x=dems$Race, D=dems)
 byGroup<-apply(dems, MARGIN = 2, FUN = tablr, x=dems$group, D=dems)
 t1<-merge(byRace$BMI,byRace$HbA1C,by="test")
@@ -89,13 +100,13 @@ all<-all[ , !(names(all) %in% drops)]
 
 
 # Make the nice table
-```{r}
+```{r nice table}
 kable(all, format = "html",  col.names = c("n","mean","SD",
                                            "n","mean","SD",
                                            "n","mean","SD",
                                            "n","mean","SD"),
       caption = "Table 1: Descriptive statistics by reported race",
-      digits = c(0, 3, 3, 0, 3, 3,0, 3, 3,0, 3, 3), align = "ccrr") %>%
+      digits = c(0, 2, 2, 0, 2, 2,0, 2, 2,0, 2, 2), align = "ccrr") %>%
   kable_styling(full_width = FALSE, position = "left") %>%
   add_header_above(c(" " = 1,"BMI"= 3,"HbA1C"= 3,"Age of menses onset"=3,"Age at scan"=3))
 
@@ -103,17 +114,17 @@ kable(all, format = "html",  col.names = c("n","mean","SD",
 
 # Summary of main findings
 Earlier onset of puberty significantly related to heavier adult BMI.
-```{r}
-ggplot(d4, aes(Menstrual_AgeBegan, BMI)) +
+```{r interaction graph}
+int_graph<-ggplot(d4, aes(Menstrual_AgeBegan, BMI)) +
   geom_point(shape=1) + 
   geom_smooth(method=lm,colour='black')+theme_classic()+scale_y_continuous(name="Body Mass Index (BMI)")+
-  scale_x_continuous(name="Age of onset of menstration")+
+  scale_x_continuous(name="Age of onset of menstration (years)")+
   theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
   theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
-
+int_graph
 ```
 
-```{r}
+```{r, results="asis", BMI and AoM models}
 m1<-lm( BMI ~  Menstrual_AgeBegan, data=d4)
 summary(m1)
 m2<-lm( BMI ~  Menstrual_AgeBegan+Age_in_Yrs, data=d4)
@@ -123,21 +134,37 @@ m3<-lm( BMI ~  Menstrual_AgeBegan+Age_in_Yrs+Race, data=d4)
 lrtest(m2,m3)
 summary(m3)
 lm.beta(m3)
+effect.size(m3)
+modelEffectSizes(m3)
+confint(m3)
 ```
+
+```{r cleaning up for table}
+x<-as.data.frame(summary(m3)[4])
+row.names(x)<-c("Intercept","Menstrual age began (yrs)","Age (yrs)", "Asian American, Native Hawaiian, Other Pacific Islander", "Black or African American", "More than one race","Unknown race or not reported", "White")
+x
+```
+
+```{r table 2}
+kable(x, format = "html",  
+      caption = "Table 2: Relationship between BMI and Age of onset of menses",
+      digits = c(2,2,2,2), align = "cccc", col.names = c("Estimate", "Standard Error","T value","P value")) %>%
+  kable_styling()
+
+
+```
+
 ## Summary
 Age of menstration is significantly related to adult BMI. This relationship remains significant with the addition of age and race in the model. Both age and race improve the model fit.
 
 
-
-
-
-```{r, eval=FALSE, echo=FALSE}
+```{r, eval=FALSE, echo=FALSE, blank for sanity}
 x<-(1:225)
 B = matrix( x,nrow=15, ncol=15)
 ```
 
 # Imaging data
-```{r}
+```{r reading in data}
 img<-read.table("~/Google Drive/HCP_graph/1200/5000perms/p_corrected.csv", sep=",", header=F)
 row.names(img)<-c("<BMI",">BMI","<AoM",">AoM","<AoMxBMI",">AoMxBMI")
 # head(img)
@@ -153,10 +180,10 @@ img_p[img_p > 0.05] <- NA
 9->11 == V131
 10->13 == V148
 14->12 == V207
-```{r}
+```{r significant pos BMI}
 matrix( as.matrix(img_p[1,1:225]),nrow=15, ncol=15)
 ```
-```{r}
+```{r plotting positive BMI}
 p1<-ggplot(d4, aes(BMI, V67)) +
   geom_point(shape=1) + 
   geom_smooth(method=lm)+scale_y_continuous(name="5 and 7")+
@@ -197,11 +224,11 @@ ggarrange(p1,p2,p3,p4 + rremove("x.text"),
 4->15 == V60
 10->12 == V147
 10->15 == V150
-```{r}
+```{r significant negative BMI}
 matrix( as.matrix(img_p[2,1:225]),nrow=15, ncol=15)
 ```
 
-```{r}
+```{r plotting negative}
 p1<-ggplot(d4, aes(BMI, V6)) +
   geom_point(shape=1) + 
   geom_smooth(method=lm)+scale_y_continuous(name="1 and 6")+
@@ -238,11 +265,11 @@ ggarrange(p1,p2,p3,p4 + rremove("x.text"),
 # Significant positive AoM
 12->15 == V180
 
-```{r}
+```{r significant positive}
 matrix( as.matrix(img_p[3,1:225]),nrow=15, ncol=15)
 ```
 
-```{r}
+```{r plotting significant positive AoM}
 p1<-ggplot(d4, aes(Menstrual_AgeBegan, V180)) +
   geom_point(shape=1) + 
   geom_smooth(method=lm)+scale_y_continuous(name="12 and 15")+
@@ -255,13 +282,13 @@ p1
 
 # Significant negative AoM
 none
-```{r}
+```{r significant negtive AoM}
 matrix( as.matrix(img_p[4,1:225]),nrow=15, ncol=15)
 ```
 
 # Tertiles
 So we can visualize the interaction effect
-```{r}
+```{r looking at tertiles}
 describe(d4$Menstrual_AgeBegan)
 hist(d4$Menstrual_AgeBegan)
 
@@ -291,11 +318,11 @@ summary(as.factor(d4$AoM))
 ![IC6](https://github.com/grace-shearrer/HCP_puberty/blob/master/viz/IC6_gordon.png?raw=true)
 ![IC6_sub](https://github.com/grace-shearrer/HCP_puberty/blob/master/viz/IC6_gordon_sub.png?raw=true)
 
-```{r}
+```{r significant BMIxAoM positive}
 matrix( as.matrix(img_p[5,1:225]),nrow=15, ncol=15)
 ```
 
-```{r}
+```{r plotting the interaction between BMI and AoM on connectivity}
 p1<-ggplot(subset(d4, !is.na(d4$AoM)), aes(BMI, V36, group=AoM, color=AoM)) +
   geom_point(shape=1) + 
   geom_smooth(method=lm)+scale_y_continuous(name="3 and 6")+
@@ -327,10 +354,10 @@ ggarrange(p1,p2 ,
 ![IC3_sub](https://github.com/grace-shearrer/HCP_puberty/blob/master/viz/IC3_gordon_sub.png?raw=true)
 
 
-```{r}
+```{r negative relationship between BMI and AoM on connectivity}
 matrix( as.matrix(img_p[6,1:225]),nrow=15, ncol=15)
 ```
-```{r}
+```{r plotting the negative AoMxBMI interaction}
 p1<-ggplot(subset(d4, !is.na(d4$AoM)), aes(BMI, V18, group=AoM, color=AoM)) +
   geom_point(shape=1) + 
   geom_smooth(method=lm)+scale_y_continuous(name="2 and 3")+
@@ -342,6 +369,66 @@ p1
 ```
 
 # Post hoc analysis of HCP data for puberty paper
+## Checking the fertility data
+```{r fertility}
+summary(as.factor(d4$Menstrual_UsingBirthControl))
+# yes = 1
+onBC<-subset(d4, d4$Menstrual_UsingBirthControl == "1")
+summary(as.factor(onBC$Menstrual_UsingBirthControl))
+summary(as.factor(onBC$Menstrual_BirthControlCode))
+# 1=OC's for contraception, 2=OC's primarily for menstrual regulation, 3=estradiol for menstrual regulation, 4=progesterone for menstrual regulation, 5=fertility therapy, 6=other, 7=unknown  (Asked of female participants only) 
+```
+## Checking SES
+```{r creating SES categories}
+# SSAGA_Employ SSAGA_Income SSAGA_Educ SSAGA_InSchool SSAGA_Rlshp
+## not working = 0, part-time employment = 1; full-time employment = 2
+summary(as.factor(d4$SSAGA_Employ))
+## Total household income: <$10,000 = 1,10K-19,999 = 2, 20K-29,999 = 3,30K-39,999 = 4, 40K-49,999 = 5, 50K-74,999 = 6, 75K-99,999 = 7, >=100,000 = 8
+## Low income == 1-2
+summary(as.factor(d4$SSAGA_Income))
+## Years of education completed: <11 = 11; 12; 13; 14; 15; 16; 17+ = 17
+summary(as.factor(d4$SSAGA_Educ))
+## Is respondent still in school for degree course? no = 0; yes = 1
+summary(as.factor(d4$SSAGA_InSchool))
+## Is respondent married or in live-in relationship? no = 0; yes = 1
+summary(as.factor(d4$SSAGA_Rlshp))
+
+low_income_single<-subset(d4 , d4$SSAGA_InSchool == 0 & d4$SSAGA_Rlshp == 0 & d4$SSAGA_Income %in% c('1', '2'))
+low_income_married<-subset(d4 , d4$SSAGA_InSchool == 0 & d4$SSAGA_Rlshp == 1 & d4$SSAGA_Income %in% c('1', '2','3'))
+low<-rbind(low_income_married, low_income_single)
+
+d4$SES[d4$SSAGA_InSchool == 0 & d4$SSAGA_Rlshp == 0 & d4$SSAGA_Income %in% c('1', '2')]<-"low_single"
+d4$SES[d4$SSAGA_InSchool == 0 & d4$SSAGA_Rlshp == 1 & d4$SSAGA_Income %in% c('1', '2','3')]<-"low_married"
+d4$SES[d4$SSAGA_InSchool == 0 & d4$SSAGA_Rlshp == 0 & d4$SSAGA_Income %in% c('3','4','5','6','7','8')]<-"norm_single"
+d4$SES[d4$SSAGA_InSchool == 0 & d4$SSAGA_Rlshp == 1 & d4$SSAGA_Income %in% c('4','5','6','7','8')]<-"norm_married"
+
+d4$SES[d4$SSAGA_InSchool == 1 & d4$SSAGA_Rlshp == 0 & d4$SSAGA_Income %in% c('1', '2')]<-"low_single_school"
+d4$SES[d4$SSAGA_InSchool == 1 & d4$SSAGA_Rlshp == 1 & d4$SSAGA_Income %in% c('1', '2','3')]<-"low_married_school"
+d4$SES[d4$SSAGA_InSchool == 1 & d4$SSAGA_Rlshp == 0 & d4$SSAGA_Income %in% c('3','4','5','6','7','8')]<-"norm_single_school"
+d4$SES[d4$SSAGA_InSchool == 1 & d4$SSAGA_Rlshp == 1 & d4$SSAGA_Income %in% c('4','5','6','7','8')]<-"norm_married_school"
+
+d4$SES_comp[d4$SES %in% c('low_single', 'low_married','low_single_school','low_married_school')]<-"low"
+d4$SES_comp[d4$SES %in% c('norm_single', 'norm_married','norm_single_school','norm_married_school')]<-"norm"
+```
+## Defintition of low income
+If single: THI < 20K
+If married: THI <30K
+
+
+```{r plotting effect of SES}
+ggplot(subset(d4, d4$SES_comp != is.na(d4$SES_comp)), aes(Menstrual_AgeBegan, BMI, group=SES_comp, color=SES_comp)) +
+  geom_point(shape=1) + 
+  geom_smooth(method=lm)+theme_classic()+scale_y_continuous(name="Body Mass Index (BMI)")+
+  scale_x_continuous(name="Age of onset of menstration")+
+  theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
+  theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
+```
+```{r binary logistic regression for SES}
+d4$SES_comp <- factor(d4$SES_comp)
+summary(d4$SES_comp)
+mylogit <- glm(SES_comp ~ Menstrual_AgeBegan*BMI, data = subset(d4, d4$SES_comp != is.na(d4$SES_comp)), family = "binomial")
+summary(mylogit)
+```
 
 ## Nodes of interest 
 sig 3->6 == V36
@@ -353,14 +440,17 @@ check 13->12 == V178
 Race
 Ethnicity
 Age_in_Yrs
-```{r}
+```{r control variables}
 ctrl1<-lm(BMI~Race+Ethnicity+Age_in_Yrs, data=d4)
 p.adjust(coef(summary(ctrl1))[, 4], method="BH")
 ctrl2<-lm(Menstrual_AgeBegan~Race+Ethnicity+Age_in_Yrs, data=d4)
 p.adjust(coef(summary(ctrl2))[, 4], method="BH")
 
+twoM <- rbind(tidy(ctrl1) %>% mutate(model = "Relationshio to BMI"), 
+                tidy(ctrl2) %>% mutate(model = "Relationship to age at onset of menses")
+                )
 
-dwplot(list(ctrl1, ctrl2), vline = geom_vline(xintercept = 0, colour = "grey60", linetype = 2))+theme_classic()
+SI1<-dwplot(twoM, vline = geom_vline(xintercept = 0, colour = "grey60", linetype = 2)) +theme_classic()
 ```
 
 Looks like I can drop ethnicity since it is not related to either BMI nor Puberty.
@@ -368,13 +458,13 @@ Looks like I can drop ethnicity since it is not related to either BMI nor Pubert
 # False Discovery Correction 
 Bonferroni
 Cor #: 11
-```{r}
+```{r bonferroni correction}
 ad = 11
 ```
 
 
 # Delay Discounting: Area Under the Curve for Discounting of $200 (DDisc_AUC_200)	Cognition	Self-regulation/Impulsivity (Delay Discounting)	DDisc_AUC_200
-```{r}
+```{r Delay Discounting $200}
 mDD1<-lm(DDisc_AUC_200~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
 summary(mDD1)
 ```
@@ -388,13 +478,13 @@ p.adjust(coef(summary(mDD2))[, 4], method="BH", ad)
 
 
 # NIH Toolbox Picture Sequence Memory Test: Age-Adjusted Scale Score
-```{r}
+```{r NIH Toolbox Picture Sequence Memory}
 mSM1<-lm(PicSeq_AgeAdj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
 summary(mSM1)
 ```
 
 # NIH Toolbox Dimensional Change Card Sort Test: Age-Adjusted Scale Score
-```{r}
+```{r NIH Toolbox Dimensional Change Card Sort Test}
 mCS1<-lm(CardSort_AgeAdj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
 summary(mCS1)
 ```
@@ -422,12 +512,12 @@ summary(mCCom1)
 ## About 
 The Crystallized Cognition Composite score is derived by averaging the normalized scores of each of the Toolbox tests that are crystallized measures (Picture Vocabulary and Reading Tests), then deriving scale scores based on this new distribution. One can interpret the Crystallized Cognition Composite as a more global assessment of individual and group verbal reasoning. Higher scores indicate higher levels of functioning. Age-adjusted Scale Score: Participant score is normed using the age appropriate band of Toolbox Norming Sample (bands of ages 18-29, or 30-35), where a score of 100 indicates performance that was at the national average and a score of 115 or 85, indicates performance 1 SD above or below the national average for participants age band.
 ```{r}
-mCCr1<-lm(CogCrystalComp_AgeAdj~log10(BMI)*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
+mCCr1<-lm(CogCrystalComp_AgeAdj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
 summary(mCCr1) #SIGNIFICANT
 ### it appears that race only improves the model for Asian therefore we will test this without the asian population which is low (36)
 p.adjust(coef(summary(mCCr1))[, 4], method="BH", ad)
 ```
-```{r}
+```{r plot of the crystalized cognition}
 ggplot(subset(d4, !is.na(AoM)), aes(BMI, CogCrystalComp_AgeAdj, color=AoM, group=AoM)) +
   geom_point(shape=1) + 
   geom_smooth(method=lm)+scale_y_continuous(name="crystal cognition")+
@@ -435,102 +525,6 @@ ggplot(subset(d4, !is.na(AoM)), aes(BMI, CogCrystalComp_AgeAdj, color=AoM, group
   theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
   theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
 ```
-
-# Mediation?
-The DAG is mostly descriptive as the cross-sectional nature of data doesn't allow causal modeling
-```{r}
-#AoMBMI_dag <- dagify(CogCrystalComp_AgeAdj~V178,
-#                      CogCrystalComp_AgeAdj~BMI+Menstrual_AgeBegan+V178,
-#                      CogCrystalComp_AgeAdj~BMI+Menstrual_AgeBegan,
-#                      CogCrystalComp_AgeAdj~BMI,
-#                      CogCrystalComp_AgeAdj~Menstrual_AgeBegan,
-#                      Menstrual_AgeBegan~Race,
-#                      V178~BMI+Menstrual_AgeBegan,
-#                      BMI~Menstrual_AgeBegan+Age_in_Yrs,
-#                      labels = c("Menstrual_AgeBegan" = "Age at onset of menses",
-#                                 "BMI" = "BMI",
-#                                 "CogCrystalComp_AgeAdj" = "Cognition Crystallized Composite\n age adjusted",
-#                                 "Age_in_Yrs" = "Age",
-#                                 "Race" = "Race",
-#                                 "V178" = "Functional connectivity\n between IC12 and IC13"),
-#                      latent = "BMI",
-#                      exposure = "Menstrual_AgeBegan",
-#                      outcome = "CogCrystalComp_AgeAdj")
-
-#ggdag(AoMBMI_dag, text = FALSE, use_labels = "label")
-```
-
-
-## Baron and Kenny
-```{r}
-mCCr2<-lm(CogCrystalComp_AgeAdj~V178+Race+Age_in_Yrs, data = d4)
-summary(mCCr2) #trend
-p.adjust(coef(summary(mCCr2))[, 4], method="BH", ad)
-```
-```{r}
-ggplot(subset(d4, !is.na(AoM)), aes(V178, CogCrystalComp_AgeAdj, color=AoM, group=AoM)) +
-  geom_point(shape=1) + 
-  geom_smooth(method=lm)+scale_y_continuous(name="crystal cognition")+
-  scale_x_continuous(name="connectivity")+
-  theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
-  theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
-```
-
-```{r}
-mCCr2.1<-lm(CogCrystalComp_AgeAdj~log10(BMI)*Menstrual_AgeBegan+V178+Race+Age_in_Yrs, data = d4)
-summary(mCCr2.1)
-p.adjust(coef(summary(mCCr2.1))[, 4], method="BH", ad)
-lm.beta(mCCr2.1)
-```
-```{r}
-ggplot(subset(d4, !is.na(AoM)), aes(BMI, V178, color=AoM, group=AoM)) +
-  geom_point(shape=1) + 
-  geom_smooth(method=lm)+scale_y_continuous(name="connectivity")+
-  scale_x_continuous(name="BMI")+
-  theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
-  theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
-```
-
-Partial mediation  
-Probably nothing because the correction for multiple comparisons  
-
-## Sobel product of coefficients 
-```{r}
-mCCr4<-lm(CogCrystalComp_AgeAdj~BMI*Menstrual_AgeBegan+V178+Race+Age_in_Yrs, data = d4)
-summary(mCCr4)
-plot(mCCr4)
-mCCr5<-lm(V178~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data=d4)
-summary(mCCr5)
-ind2<--0.38462*0.05209
-ind2
-```
-# Bootstrapping the sobel method
-
-model 1 CogCrystalComp_AgeAdj~BMI*Menstrual_AgeBegan+V178
-
-model 2 V178~BMI*Menstrual_AgeBegan
-
-```{r}
-rsq <- function(formula1,formula2, data, indices) {
-  d <- data[indices,] # allows boot to select sample 
-  M1 <- lm(formula1, data=d)
-  M2 <- lm(formula2, data=d)
-  B_ind <- coef(M1)[4]*coef(M2)[4]
-  return(B_ind)
-} 
-# bootstrapping with 100000 replications 
-#results <- boot(data=d4, statistic=rsq, 
-#   R=100000, formula1=CogCrystalComp_AgeAdj~BMI*Menstrual_AgeBegan+V178+Race+Age_in_Yrs,
-#   formula2=V178~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs)
-
-# view results
-#results 
-#plot(results)
-
-# get 95% confidence interval 
-#boot.ci(results, type="bca")
-```
-
 # HbA1c
 ```{r}
 mHb1<-lm(HbA1C~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
@@ -538,13 +532,13 @@ summary(mHb1)
 ```
 
 # NIH Toolbox 2-minute Walk Endurance Test : Age-Adjusted Scale Score	Motor	Endurance (2 minute walk test)	Endurance_AgeAdj
-```{r}
+```{r NIH Toolbox 2-minute Walk Endurance Test}
 mEn1<-lm(Endurance_AgeAdj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
 summary(mEn1)
 ```
 
 # NIH Toolbox Grip Strength Test: Age-Adjusted-Adjusted Scale Score	Motor	Strength (Grip Strength Dynamometry)	Strength_AgeAdj
-```{r}
+```{r NIH Toolbox Grip Strength Test}
 mSt1<-lm(Strength_AgeAdj ~ BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
 summary(mSt1)
 ```
@@ -555,17 +549,259 @@ mStress1<-lm(PercStress_Unadj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
 summary(mStress1)
 ```
 
-# NIH Toolbox Cognition Total Composite Score: Age Adjusted Scale Score
-```{r}
-mTCog1<-lm(CogTotalComp_AgeAdj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
-summary(mTCog1)
-```
-
 # Taste_AgeAdj
 ```{r}
 mTaste1<-lm(Taste_AgeAdj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
 summary(mTaste1)
 ```
+
+## Heritability
+Self-reported zygosity. Until the S1200 release this was the \Zygosity\" measure. The small number of subjects who do not have a value for this measure (blank) self reported as twins but did not self report their twin zygosity."  
+Twin zygosity verified by genotyping. Requires both subjects in a twin pair to have HasGT=TRUE to have a value (if genotyping is not available for either of a twin pair, no values are given for ZygosityGT).  Non-twin subjects also do not have a value for ZygosityGT.  Note that some subjects self-reported as dizygotic twins (ZygositySR='NotMZ') but genotyping established that they were monozygotic twins (thence ZygosityGT='MZ' for those subjects).  ZygosityGT should be given precedence over ZygositySR.
+
+## Nodes of interest 
+sig 3->6 == V36
+check 6 -> 3 == V78
+12->13 == V192
+check 13->12 == V178
+```{r}
+twins<-subset(d4 , d4$ZygosityGT %in% c('DZ', 'MZ'))
+myvars<-c("Family_ID","Subject","Menstrual_AgeBegan","BMI","ZygosityGT","Age_in_Yrs","Race","Gender","V36","V78","V178","V192")
+d5<-twins[myvars]
+d5$ZygosityGT<-factor(d5$ZygosityGT)
+d5$Race<-factor(d5$Race)
+d6 <- fast.reshape(d5, id="Family_ID",varying=c("BMI","Menstrual_AgeBegan","Subject","V36","V78","V178","V192"))
+d6<-na.omit(d6)
+head(d6)
+```
+
+```{r}
+library("cowplot")  
+scatterdens <- function(x) {
+  sp <- ggplot(x,aes_string(colnames(x)[1], colnames(x)[2])) + theme_minimal() + geom_point(alpha=0.3) + geom_density_2d()
+  xdens <- ggplot(x, aes_string(colnames(x)[1],fill=1)) + theme_minimal() +  geom_density(alpha=.5)+ theme(axis.text.x = element_blank(), legend.position =  "none"  ) + labs(x=NULL) 
+  ydens <- ggplot(x, aes_string(colnames(x)[2],fill=1)) +  theme_minimal() +  geom_density(alpha=.5) +    theme(axis.text.y = element_blank(),  axis.text.x = element_text(angle=90, vjust=0), legend.position =  "none"  ) +  labs(x=NULL) + coord_flip()   
+  g <- plot_grid(xdens,NULL,sp,ydens, ncol=2,nrow=2,                                                                         rel_widths=c(4,1.4),rel_heights=c(1.4,4))   
+  return(g)  
+}
+```
+
+```{r}
+mz_bmi <- log(subset(d6, ZygosityGT ==  "MZ"  )[,c("BMI1","BMI2")])  
+p_bmi_mz<-scatterdens(mz_bmi)
+mz_aom<-subset(d6, ZygosityGT ==  "MZ"  )[,c("Menstrual_AgeBegan1","Menstrual_AgeBegan2")]
+p_aom_mz<-scatterdens(mz_aom)
+
+mz_V178<-subset(d6, ZygosityGT ==  "MZ"  )[,c("V1781","V1782")]
+p_V178_mz<-scatterdens(mz_V178)
+
+mz_V36<-subset(d6, ZygosityGT ==  "MZ"  )[,c("V361","V362")]
+p_V36_mz<-scatterdens(mz_V36)
+
+
+
+dz_bmi <- log(subset(d6, ZygosityGT ==  "DZ"  )[,c(  "BMI1"  ,  "BMI2"  )]) 
+p_bmi_dz<-scatterdens(dz_bmi)
+dz_aom<-subset(d6, ZygosityGT ==  "DZ"  )[,c("Menstrual_AgeBegan1","Menstrual_AgeBegan2")]
+p_aom_dz<-scatterdens(dz_aom)
+
+dz_V178<-subset(d6, ZygosityGT ==  "DZ"  )[,c("V1781","V1782")]
+p_V178_dz<-scatterdens(dz_V178)
+
+dz_V36<-subset(d6, ZygosityGT ==  "DZ"  )[,c("V361","V362")]
+p_V36_dz<-scatterdens(dz_V36)
+
+pBMI<-ggarrange(p_bmi_mz,p_bmi_dz + rremove("x.text"), 
+          labels = c("A", "B"),
+          ncol = 2, nrow = 1)
+
+pAoM<-ggarrange(p_aom_mz,p_aom_dz + rremove("x.text"), 
+          labels = c("A", "B"),
+          ncol = 2, nrow = 1)
+
+pV178<-ggarrange(p_V178_mz,p_V178_dz + rremove("x.text"), 
+          labels = c("A", "B"),
+          ncol = 2, nrow = 1)
+
+pV36<-ggarrange(p_V36_mz,p_V36_dz + rremove("x.text"), 
+          labels = c("A", "B"),
+          ncol = 2, nrow = 1)
+
+```
+
+```{r}
+cor.test(mz_bmi[,1],mz_bmi[,2], method=  "spearman"  )  
+cor.test(dz_bmi[,1],dz_bmi[,2], method=  "spearman"  )  
+
+cor.test(mz_aom[,1],mz_aom[,2], method=  "spearman"  )  
+cor.test(dz_aom[,1],dz_aom[,2], method=  "spearman"  )  
+```
+
+## About the results
+Heritability is formally defined as the proportion of phenotypic variation (VP) that is due to variation in genetic values (VG).  
+### Broad-sense heritability  
+Defined as H2 = VG/VP, captures the *proportion of phenotypic variation due to genetic values that may include effects due to dominance and epistasis*.
+ * dominance - possible allelic interactions within loci  
+ * epistasis- between loci  
+
+### Narrow-sense heritability
+h2 = VA/VP, refers to the proportion of phenotypic variation that is due to additive genetic values (VA)
+
+*The phenotypic variance (VP)* in a population is influenced by genetic variance (VG) and environmental sources (VE)
+
+VP = VG + VE
+so then narrow sense is also defined as:  
+
+*h2 = EA/(VG+VE)*
+
+The total amount of genetic variance can be divided into several groups, including additive variance (VA), dominance variance (VD), and epistatic variance (VI).
+VG = VA + VD + VI
+so then narrow sense is also:
+
+*h2 = VA/(VA+VD+VI+VE)*
+
+### variance components
+* additive genetic (A)  
+* common shared family environment (C)  
+* non-shared environmental (E) 
+* genetic dominance effects (D) 
+```{r}
+dd<-na.omit(d5)
+dd$ZygosityGT <- factor(dd$ZygosityGT)
+dd$Race<- factor(dd$Race)
+l0 <- twinlm(BMI ~ 1+Age_in_Yrs+Race+Menstrual_AgeBegan, data=dd,  DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)  
+summary(l0)
+bmi_acde<-summary(l0)$acde
+dim(bmi_acde)
+```
+
+```{r}
+bmi_acde %>%
+  kable(digits = c(2,2,2)) %>%
+  kable_styling( position = "left") %>%
+  add_header_above(c(" "= 1, " " = 1, "Confidence Interval" = 2))
+```
+
+
+
+```{r}
+l1 <- twinlm(Menstrual_AgeBegan ~ 1+Age_in_Yrs+Race, data=dd,  DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)  
+summary(l1) 
+```
+
+
+```{r}
+aom_acde<-summary(l1)$acde
+aom_acde %>%
+  kable(digits = c(2,2,2)) %>%
+  kable_styling( position = "left") %>%
+  add_header_above(c(" "= 1, " " = 1, "Confidence Interval" = 2))
+```
+
+
+```{r}
+l2 <- twinlm(V178 ~ 1+BMI*Menstrual_AgeBegan+Age_in_Yrs+Race, data=d5,
+DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)  
+summary(l2) 
+```
+
+```{r}
+V178_acde<-summary(l2)$acde
+V178_acde %>%
+  kable(digits = c(2,2,2)) %>%
+  kable_styling( position = "left") %>%
+  add_header_above(c(" "= 1, " " = 1, "Confidence Interval" = 2))
+```
+
+
+
+```{r}
+l3 <- twinlm(V36 ~ 1+BMI*Menstrual_AgeBegan+Age_in_Yrs+Race, data=d5,
+DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)  
+y<-summary(l3) 
+names(y)
+y$estimate
+```
+
+```{r}
+V36_acde<-summary(l3)$acde
+V36_acde %>%
+  kable(digits = c(2,2,2)) %>%
+  kable_styling( position = "left") %>%
+  add_header_above(c(" "= 1, " " = 1, "Confidence Interval" = 2))
+```
+
+
+
+
+```{r}
+x0<-summary(l0)
+x1<-summary(l1)
+x2<-summary(l2)
+x3<-summary(l3)
+y0<-as.data.frame(x0[9])
+y1<-as.data.frame(x1[9])
+y2<-as.data.frame(x2[9])
+y3<-as.data.frame(x3[9])
+
+y0$fac<-row.names(y0)
+y1$fac<-row.names(y1)
+y2$fac<-row.names(y2)
+y3$fac<-row.names(y3)
+```
+
+
+```{r}
+pd <- position_dodge(0.1) 
+n0= 1
+
+plt0<-ggplot(y0, aes(x=fac, y=acde.Estimate, color=fac)) + ggtitle("BMI") + geom_point(position=position_dodge(), stat="identity",size=n0) +
+  geom_errorbar(aes(ymin=acde.2.5., ymax=acde.97.5.),
+                size=.3,    
+                width=.2,
+                position=position_dodge(.9))+
+  geom_hline(aes(yintercept = 0),  color = "red")+
+  theme_classic()+ 
+  theme(legend.position="none")
+  
+
+plt1<-ggplot(y1, aes(x=fac, y=acde.Estimate, color=fac)) +  ggtitle("AoM") + geom_point(position=position_dodge(), stat="identity",size=n0) +
+  geom_errorbar(aes(ymin=acde.2.5., ymax=acde.97.5.),
+                size=.3,    
+                width=.2,
+                position=position_dodge(.9))+ 
+  geom_hline(aes(yintercept = 0),  color = "red")+
+  theme_classic()+ 
+  theme(legend.position="none")
+  
+
+plt2<-ggplot(y2, aes(x=fac, y=acde.Estimate, color=fac)) +  ggtitle("V178") + geom_point(position=position_dodge(), stat="identity",size=n0) +
+  geom_errorbar(aes(ymin=acde.2.5., ymax=acde.97.5.),
+                size=.3,    
+                width=.2,
+                position=position_dodge(.9))+
+  geom_hline(aes(yintercept = 0),  color = "red")+
+  theme_classic()+ 
+  theme(legend.position="none")
+
+plt3<-ggplot(y3, aes(x=fac, y=acde.Estimate, color=fac)) +   ggtitle("V36")  +geom_point(position=position_dodge(), stat="identity",size=n0) +
+  geom_errorbar(aes(ymin=acde.2.5., ymax=acde.97.5.),
+                size=.3,    
+                width=.2,
+                position=position_dodge(.9))+ 
+  geom_hline(aes(yintercept = 0),  color = "red")+
+  theme_classic()+ 
+  theme(legend.position="none")
+
+
+acde<-ggarrange(plt0,plt1,plt2,plt3 + rremove("x.text"), 
+          labels = c("A", "B","C","D"),
+          ncol = 2, nrow = 2)
+
+```
+## Summary
+
+It appears that the genetic contribution in this sample to BMI and Age of onset of menses is minimal and predomiently through the enviroment. However, we see a large effect of both genetic domience and enviroment on connectivity between 12 and 13. Much more modest differences in the 3 and 6 connectivity with the enviroment.
 
 
 
