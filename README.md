@@ -1,5 +1,7 @@
 # HCP_puberty
-[![DOI](https://zenodo.org/badge/200871491.svg)](https://zenodo.org/badge/latestdoi/200871491) 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3462580.svg)](https://doi.org/10.5281/zenodo.3462580)
+
+
 This repository has all the code used to analyze the interaction between age at onset of puberty and adult BMI on functional correlations.
 
 The repo is organized by type of script (python, R, etc).
