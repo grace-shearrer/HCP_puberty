@@ -988,3 +988,41 @@ It appears that the genetic contribution in this sample to BMI and Age of onset 
 
 
 ## Response to reviewers
+```{r}
+motion<-read.table("~/Google Drive/HCP_graph/1200/datasets/HCP1200-Motion-Summaries.csv", header=T, sep=",")
+head(motion)
+
+d4m<-join(d4,motion)
+
+
+```
+
+```{r}
+motion_graph<-ggplot(d4m, aes(BMI, motion)) +
+  geom_point(shape=1) + 
+  geom_smooth(method=lm,colour='black')+theme_classic()+scale_y_continuous(name="Frame to frame head motion summary")+
+  scale_x_continuous(name="Body mass index (BMI)")+
+  theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
+  theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
+motion_graph
+```
+```{r}
+mm1<-lm( BMI ~  motion, data=d4m)
+summary(mm1)
+mm2<-lm( BMI ~  motion+Age_in_Yrs, data=d4m)
+lrtest(mm1,mm2)
+summary(mm2) #age and motion related to BMI
+mm3<-lm( BMI ~  motion+Age_in_Yrs+Race, data=d4m)
+lrtest(mm2,mm3)
+summary(mm3)
+mm4<-lm( BMI ~  motion+Menstrual_AgeBegan+Age_in_Yrs+Race, data=d4m)
+lrtest(mm3,mm4)
+summary(mm4) #menses is still significant even with motion parameters
+summary(m3)
+
+lm.beta(mm4)
+effect.size(mm4)
+modelEffectSizes(mm4)
+confint(mm4)
+```
+
