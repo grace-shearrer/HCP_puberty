@@ -987,4 +987,4 @@ acde
 It appears that the genetic contribution in this sample to BMI and Age of onset of menses is minimal and predomiently through the enviroment. However, we see a large effect of both genetic domience and enviroment on connectivity between 12 and 13. Much more modest differences in the 3 and 6 connectivity with the enviroment.
 
 
-
+## Response to reviewers
