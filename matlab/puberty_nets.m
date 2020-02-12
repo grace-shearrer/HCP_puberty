@@ -14,7 +14,7 @@ tic
 group_maps='/projects/niblab/data/HCP_PTN1200/groupICA/groupICA_3T_HCP1200_MSMAll_d15.ica';     % spatial maps 4D NIFTI file, e.g. from group-ICA
    %%% you must have already run the following (outside MATLAB), to create summary pictures of the maps in the NIFTI file:
    %%% slices_summary <group_maps> 4 $FSLDIR/data/standard/MNI152_T1_2mm <group_maps>.sum
-ts_dir='/projects/niblab/data/HCP_PTN1200/node_timeseries/3T_HCP1200_MSMAll_d15_ts2/puberty';  % dual regression output directory, containing all subjects' timeseries
+ts_dir='/projects/niblab/data/HCP_PTN1200/node_timeseries/3T_HCP1200_MSMAll_d15_ts2/puberty';  % dual regression output directory, containing all subjects timeseries
 
 
 %%% load timeseries data from the dual regression output directory
@@ -58,7 +58,7 @@ netmats1=  nets_netmats(ts,1,'corr');       % full correlation (normalised covar
 
 %%% view hierarchical clustering of nodes
 %%% arg1 is shown below the diagonal (and drives the clustering/hierarchy); arg2 is shown above diagonal
-%nets_hierarchy(Znet1,Znet5,ts.DD,group_maps); 
+%nets_hierarchy(Znet1,Znet5,ts.DD,group_maps);
 
 %%% view interactive netmat web-based display
 %nets_netweb(Znet1,Znet5,ts.DD,group_maps,'netweb');
@@ -85,8 +85,8 @@ netmats1=  nets_netmats(ts,1,'corr');       % full correlation (normalised covar
 %saveas(h,name,'fig')
 %edges=nets_edgepics(ts,group_maps,Znet1,reshape(p_corrected(1,:),ts.Nnodes,ts.Nnodes),6); %%%%%%%%%%%%%%%%%%%%%%%%%
 %example=nets_edgepics(ts,group_maps,meannetmat,net,showN,varargin);
-%edges_ln_gr_hv=nets_edgepics(ts,group_maps,Znet1,reshape(lean_gr_heavy(1,:),ts.Nnodes,ts.Nnodes),6,2); 
-%edges_hv_gr_ln=nets_edgepics(ts,group_maps,Znet1,reshape(heavy_gr_lean(1,:),ts.Nnodes,ts.Nnodes),6,2); 
+%edges_ln_gr_hv=nets_edgepics(ts,group_maps,Znet1,reshape(lean_gr_heavy(1,:),ts.Nnodes,ts.Nnodes),6,2);
+%edges_hv_gr_ln=nets_edgepics(ts,group_maps,Znet1,reshape(heavy_gr_lean(1,:),ts.Nnodes,ts.Nnodes),6,2);
 %saveas(h,edges,'jpg')
 %saveas(g,edges_hv_gr_ln,'jpg')
 %nets_edgepics(ts,group_maps,Znet1,reshape(p_corrected(1,:),ts.Nnodes,ts.Nnodes),6);
