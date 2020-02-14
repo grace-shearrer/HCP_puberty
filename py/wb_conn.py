@@ -4,7 +4,15 @@ import pandas as pd
 import numpy as np
 import shutil
 import pdb
+import multiprocess as mltp
+from multiprocess import Pool
 
+def start_process():
+    print('Starting', mltp.current_process().name)
+
+def split_list(a_list):
+    half = len(a_list)//2
+    return a_list[:half], a_list[half:]
 
 def selecter(b, datapath):
     for sub in b:
@@ -17,7 +25,7 @@ def selecter(b, datapath):
         else:
             shutil.move(infile,outfile)
             # import pdb; pdb.set_trace()
-def 2pseries (b, datapath):
+def To_pseries(b, datapath):
     for sub in b:
         infile=os.path.join(datapath,'puberty','%s.dtseries.nii'%sub)
         outfile=outfile=os.path.join(datapath,'puberty','%s.ptseries.nii'%sub)
@@ -28,10 +36,11 @@ def 2pseries (b, datapath):
             callout = subprocess.Popen(command)
             callout.communicate()
 
-def 
-
-def main():
-    datapath = '/Users/gracer/Downloads/HCP_S1200_PTNmaps_d15_25_50_100/3T_HCP1200_MSMAll_d15_ts2_Z'
-    df = pd.read_csv('~/Google Drive/HCP_graph/1200/datasets/solo_subjects510.csv', sep=',')
-    a = df['subject'].unique()
-    b=a.tolist()
+def To_pconn(b):
+        for infile in b:
+            sub=infile.split('/')[7].split('.')[0]
+            outfile=outfile=os.path.join('/Users/gracer/Downloads/HCP_S1200_PTNmaps_d15_25_50_100/3T_HCP1200_MSMAll_d15_ts2_Z','puberty','%s.pconn.nii'%sub)
+            print(sub)
+            command = ['wb_command' ,'-cifti-correlation', infile, outfile]
+            callout = subprocess.Popen(command)
+            callout.communicate()
