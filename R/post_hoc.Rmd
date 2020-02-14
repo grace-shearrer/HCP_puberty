@@ -61,9 +61,11 @@ d4<-subset(d3, d3$group == 1)
 summary(is.na(d4$V36))
 d4<-d4[!is.na(d4$V36),]
 #head(netmat)
-dim(netmat)
+dim(d4)
+d4$BMI_C
 ```
 The missing check is OK. Lines up with imaging data.
+
 
 ```{r}
 summary(d4$Age_in_Yrs)
@@ -997,7 +999,7 @@ head(motion)
 
 d4m<-join(d4,motion)
 
-
+names(d4m)
 ```
 
 ```{r}
@@ -1229,4 +1231,8 @@ acde
 ```{r}
 plt4m
 ```
+```{r}
+names(glm)<-c("Subject", "group","BMI_C","AOM_C","int","race","age")
 
+write.table(cbind(d4m$Subject,d4m$group,d4m$BMI_C,d4m$AOM_C,d4m$int,d4m$race,d4m$age,d4m$motion), "~/Google Drive/HCP_graph/1200/datasets/subs510.csv", sep=",")
+```
