@@ -61,9 +61,11 @@ d4<-subset(d3, d3$group == 1)
 summary(is.na(d4$V36))
 d4<-d4[!is.na(d4$V36),]
 #head(netmat)
-dim(netmat)
+dim(d4)
+d4$BMI_C
 ```
 The missing check is OK. Lines up with imaging data.
+
 
 ```{r}
 summary(d4$Age_in_Yrs)
@@ -766,6 +768,8 @@ AICc
 l0   11 1365.239
 l0.0  9 3158.090
 ```{r}
+bmi_acde<-summary(l0)$acde
+
 bmi_acde %>%
   kable(digits = c(2,2,2)) %>%
   kable_styling( position = "left") %>%
@@ -869,13 +873,14 @@ l3   13 1186.078
 l3.0 11 2676.394
 
 ```{r}
-V36_acde<-summary(l3)$estimate
-V36_acde %>%
-  kable(digits = c(2,2,2,2)) %>%
-  kable_styling( position = "left") %>%
-  add_header_above(c("Estimate" = 1, "Standard Error" = 1, "Z-value" = 1, "p value" = 1))
-```
+V36_acde<-summary(l3)$acde
 
+V36_acde %>%
+  kable(digits = c(2,2,2)) %>%
+  kable_styling( position = "left") %>%
+  add_header_above(c(" "= 1, " " = 1, "Confidence Interval" = 2))
+
+```
 
 
 
@@ -987,4 +992,247 @@ acde
 It appears that the genetic contribution in this sample to BMI and Age of onset of menses is minimal and predomiently through the enviroment. However, we see a large effect of both genetic domience and enviroment on connectivity between 12 and 13. Much more modest differences in the 3 and 6 connectivity with the enviroment.
 
 
+## Response to reviewers
+```{r}
+motion<-read.table("~/Google Drive/HCP_graph/1200/datasets/HCP1200-Motion-Summaries.csv", header=T, sep=",")
+head(motion)
 
+d4m<-join(d4,motion)
+
+names(d4m)
+```
+
+```{r}
+motion_graph<-ggplot(d4m, aes(BMI, motion)) +
+  geom_point(shape=1) + 
+  geom_smooth(method=lm,colour='black')+theme_classic()+scale_y_continuous(name="Frame to frame head motion summary")+
+  scale_x_continuous(name="Body mass index (BMI)")+
+  theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
+  theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
+motion_graph
+```
+```{r}
+mm1<-lm( BMI ~  motion, data=d4m)
+summary(mm1)
+mm2<-lm( BMI ~  motion+Age_in_Yrs, data=d4m)
+lrtest(mm1,mm2)
+summary(mm2) #age and motion related to BMI
+mm3<-lm( BMI ~  motion+Age_in_Yrs+Race, data=d4m)
+lrtest(mm2,mm3)
+summary(mm3)
+mm4<-lm( BMI ~  motion+Menstrual_AgeBegan+Age_in_Yrs+Race, data=d4m)
+lrtest(mm3,mm4)
+summary(mm4) #menses is still significant even with motion parameters
+summary(m3)
+
+lm.beta(mm4)
+effect.size(mm4)
+modelEffectSizes(mm4)
+confint(mm4)
+```
+### Heritability with motion correction
+```{r}
+twins<-subset(d4m , d4$ZygosityGT %in% c('DZ', 'MZ'))
+myvars<-c("Family_ID","Subject","Menstrual_AgeBegan","BMI","ZygosityGT","Age_in_Yrs","Race","Gender","V36","V78","V178","V192", "motion")
+d5m<-twins[myvars]
+d5m$ZygosityGT<-factor(d5m$ZygosityGT)
+d5m$Race<-factor(d5m$Race)
+d6m <- fast.reshape(d5m, id="Family_ID",varying=c("BMI","Menstrual_AgeBegan","Subject","V36","V78","V178","V192", "motion"))
+d6m<-na.omit(d6m)
+```
+
+
+```{r}
+ddm<-na.omit(d5m)
+ddm<-subset(ddm, ddm$ZygosityGT != " ")
+ddm$ZygosityGT <- factor(ddm$ZygosityGT)
+ddm<-na.omit(ddm)
+ddm$Race<- factor(ddm$Race)
+ddm$ZygosityGT <- factor(ddm$ZygosityGT)
+
+l0.0m<-lm(BMI~Age_in_Yrs+Race+Menstrual_AgeBegan+motion, data = d4m)
+summary(l0.0m)
+l0m <- twinlm(BMI ~ 1+Age_in_Yrs+Race+Menstrual_AgeBegan+motion, data=ddm,  DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)  
+summary(l0m)
+
+# AIC
+AIC(l0.0m)
+AICc(l0m,l0.0m)
+```
+```{r}
+l1.0m<-lm(BMI~Age_in_Yrs+Race+Menstrual_AgeBegan+motion, data = d4m)
+summary(l1.0m)
+l1m <- twinlm(Menstrual_AgeBegan ~ 1+Age_in_Yrs+Race+motion, data=ddm,  DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)  
+summary(l1m)
+
+# AIC
+AIC(l1.0m)
+AICc(l1m,l1.0m)
+```
+```{r}
+l2.0m<-lm(V178 ~ BMI*Menstrual_AgeBegan+Age_in_Yrs+Race+motion, data = d4m)
+summary(l2.0m)
+l2m <- twinlm(V178 ~ 1+BMI*Menstrual_AgeBegan+Age_in_Yrs+Race+motion, data=ddm,  DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)  
+summary(l2m)
+
+# AIC
+AIC(l2.0m)
+AICc(l2m,l2.0m)
+```
+```{r}
+l3.0m<-lm(V36 ~ BMI*Menstrual_AgeBegan+Age_in_Yrs+Race+motion, data = d4m)
+summary(l2.0m)
+l3m <- twinlm(V36 ~ 1+BMI*Menstrual_AgeBegan+Age_in_Yrs+Race+motion, data=ddm,  DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)  
+summary(l3m)
+
+# AIC
+AIC(l3.0m)
+AICc(l3m,l3.0m)
+```
+```{r}
+ddmR<-subset(ddm, ddm$Race != "RaceAm. Indian/Alaskan Nat.")
+ddmR$Race<-factor(ddmR$Race)
+l4.0m<-lm(motion ~ Age_in_Yrs+Race*BMI, data = d4m)
+summary(l4.0m)
+ddmR<-na.omit(ddmR)
+l4m <- twinlm(motion ~ 1+Age_in_Yrs+BMI:Race, data=ddmR,  DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)  
+summary(l4m)
+
+# AIC
+AIC(l4.0m)
+AICc(l4m,l4.0m)
+```
+
+```{r}
+x0m<-summary(l0m)
+x1m<-summary(l1m)
+x2m<-summary(l2m)
+x3m<-summary(l3m)
+x4m<-summary(l4m)
+
+y0m<-as.data.frame(x0m[9])
+y1m<-as.data.frame(x1m[9])
+y2m<-as.data.frame(x2m[9])
+y3m<-as.data.frame(x3m[9])
+y4m<-as.data.frame(x4m[9])
+
+y0m$fac<-row.names(y0m)
+y1m$fac<-row.names(y1m)
+y2m$fac<-row.names(y2m)
+y3m$fac<-row.names(y3m)
+y4m$fac<-row.names(y4m)
+```
+
+
+```{r}
+pd <- position_dodge(0.1) 
+n0= 3
+
+plt0m<-ggplot(y0m, aes(x=fac, y=acde.Estimate, color=fac)) + 
+  ggtitle("BMI") + 
+  geom_point(position=position_dodge(), stat="identity",size=n0) +
+  geom_errorbar(aes(ymin=acde.2.5., ymax=acde.97.5.),
+                size=1,    
+                width=.5,
+                position=position_dodge(.9))+
+  geom_hline(aes(yintercept = 0),  color = "grey")+
+  scale_color_manual(values = c("#000000", "#999999", "#CCCCCC",  "#666666"))+
+  theme_classic()+
+  scale_x_discrete(name="Genetic component")+
+  scale_y_continuous(name="Estimate")+
+  theme(axis.title.x = element_text(size=20), axis.text.x  = element_text(size=20))+
+  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+ 
+  theme(legend.text = element_text(size=20))+ 
+  theme(legend.title = element_text(size=20, face="bold"))+
+  theme(legend.position="none")
+  
+
+plt1m<-ggplot(y1m, aes(x=fac, y=acde.Estimate, color=fac)) + 
+  ggtitle("Age at onset of menses") + 
+  geom_point(position=position_dodge(), stat="identity",size=n0) +
+  geom_errorbar(aes(ymin=acde.2.5., ymax=acde.97.5.),
+                size=1,    
+                width=.5,
+                position=position_dodge(.9))+
+  geom_hline(aes(yintercept = 0),  color = "grey")+
+  scale_color_manual(values = c("#000000", "#999999", "#CCCCCC",  "#666666"))+
+  theme_classic()+
+  scale_x_discrete(name="Genetic component")+
+  scale_y_continuous(name="Estimate")+
+  theme(axis.title.x = element_text(size=20), axis.text.x  = element_text(size=20))+
+  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+ 
+  theme(legend.text = element_text(size=20))+ 
+  theme(legend.title = element_text(size=20, face="bold"))+
+  theme(legend.position="none")
+  
+
+plt2m<-ggplot(y2m, aes(x=fac, y=acde.Estimate, color=fac)) + 
+  ggtitle("Correlation between IC12 and IC13") + 
+  theme(plot.title = element_text(size = 20, face = "bold"))+
+  geom_point(position=position_dodge(), stat="identity",size=n0) +
+  geom_errorbar(aes(ymin=acde.2.5., ymax=acde.97.5.),
+                size=1,    
+                width=.5,
+                position=position_dodge(.9))+
+  geom_hline(aes(yintercept = 0),  color = "grey")+
+  scale_color_manual(values = c("#000000", "#999999", "#CCCCCC",  "#666666"))+
+  theme_classic()+
+  scale_x_discrete(name="Genetic component")+
+  scale_y_continuous(name="Estimate")+
+  theme(axis.title.x = element_text(size=20), axis.text.x  = element_text(size=20))+
+  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+ 
+  theme(legend.text = element_text(size=20))+ 
+  theme(legend.title = element_text(size=20, face="bold"))+
+  theme(legend.position="none")
+
+plt3m<-ggplot(y3m, aes(x=fac, y=acde.Estimate, color=fac)) + 
+  ggtitle("Correlation between IC3 and IC6") + 
+  theme(plot.title = element_text(size = 20, face = "bold"))+
+  geom_point(position=position_dodge(), stat="identity",size=n0) +
+  geom_errorbar(aes(ymin=acde.2.5., ymax=acde.97.5.),
+                size=1,    
+                width=.5,
+                position=position_dodge(.9))+
+  geom_hline(aes(yintercept = 0),  color = "grey")+
+  scale_color_manual(values = c("#000000", "#999999", "#CCCCCC",  "#666666"))+
+  theme_classic()+
+  scale_x_discrete(name="Genetic component")+
+  scale_y_continuous(name="Estimate")+
+  theme(axis.title.x = element_text(size=20), axis.text.x  = element_text(size=20))+
+  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+ 
+  theme(legend.text = element_text(size=20))+ 
+  theme(legend.title = element_text(size=20, face="bold"))+
+  theme(legend.position="none")
+
+plt4m<-ggplot(y4m, aes(x=fac, y=acde.Estimate, color=fac)) + 
+  ggtitle("Correlation between motion and BMI") + 
+  theme(plot.title = element_text(size = 20, face = "bold"))+
+  geom_point(position=position_dodge(), stat="identity",size=n0) +
+  geom_errorbar(aes(ymin=acde.2.5., ymax=acde.97.5.),
+                size=1,    
+                width=.5,
+                position=position_dodge(.9))+
+  geom_hline(aes(yintercept = 0),  color = "grey")+
+  scale_color_manual(values = c("#000000", "#999999", "#CCCCCC",  "#666666"))+
+  theme_classic()+
+  scale_x_discrete(name="Genetic component")+
+  scale_y_continuous(name="Estimate")+
+  theme(axis.title.x = element_text(size=20), axis.text.x  = element_text(size=20))+
+  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+ 
+  theme(legend.text = element_text(size=20))+ 
+  theme(legend.title = element_text(size=20, face="bold"))+
+  theme(legend.position="none")
+
+acde<-ggarrange(plt0m,plt1m,plt2m,plt3m,plt4m + rremove("x.text"), 
+          labels = c("A", "B","C","D"),
+          ncol = 2, nrow = 3)
+acde
+```
+```{r}
+plt4m
+```
+```{r}
+names(glm)<-c("Subject", "group","BMI_C","AOM_C","int","race","age")
+
+write.table(cbind(d4m$Subject,d4m$group,d4m$BMI_C,d4m$AOM_C,d4m$int,d4m$race,d4m$age,d4m$motion), "~/Google Drive/HCP_graph/1200/datasets/subs510.csv", sep=",")
+```
