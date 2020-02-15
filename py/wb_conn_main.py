@@ -22,6 +22,6 @@ if __name__ == '__main__':
     pool_size = 2
     pool = Pool(processes=pool_size,
                 initializer=wc.start_process)
-    [beta, gamma]=pool.map(wc.To_pconn,[B,C])
+    [beta, gamma]=pool.map(wc.To_text,[B,C])
     pool.close()
     pool.join()

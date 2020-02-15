@@ -44,3 +44,15 @@ def To_pconn(b):
             command = ['wb_command' ,'-cifti-correlation', infile, outfile]
             callout = subprocess.Popen(command)
             callout.communicate()
+
+def To_text(b):
+        for infile in b:
+            sub=infile.split('/')[7].split('.')[0]
+            outfile=outfile=os.path.join('/Users/gracer/Downloads/HCP_S1200_PTNmaps_d15_25_50_100/3T_HCP1200_MSMAll_d15_ts2_Z','puberty','%s.txt'%sub)
+            print(sub)
+            command = ['wb_command' ,'-cifti-convert','-to-text', infile, outfile]
+            callout = subprocess.Popen(command)
+            callout.communicate()
+
+
+# wb_command -cifti-convert -to-text 173940.ptseries.nii text_ptseries.txt
