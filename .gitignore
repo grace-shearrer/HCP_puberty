@@ -4,6 +4,8 @@
 # Ignore all text files
 *.txt
 
+*/.ipynb_checkpoints
+
 # Ignore all cifti
 *.gii
 *.nii
