@@ -2,7 +2,6 @@ import numpy as np
 import glob
 import os
 import csv
-
 import pandas as pd
 
 basepath = '/Users/gracer/Desktop/'
@@ -13,9 +12,6 @@ filepath=os.path.join(basepath,'hmotion_corr','p_corr.txt')
 
 df=pd.read_csv('filepath', sep='\t',header=None)
 df.values
-
-
-
 
 with open(filepath,'r') as infile:
 	for line in infile.readlines():
