@@ -1,0 +1,191 @@
+---
+title: "graph"
+author: "Grace Shearrer"
+date: "2/18/2020"
+output: html_document
+---
+
+```{r}
+library(lsmeans)
+library(ggplot2)
+library(psych)
+library(lm.beta)
+library(lmtest)
+```
+
+```{r}
+data=read.table('~/Google Drive/HCP_graph/1200/datasets/TOTAL_DF.csv', sep=",",header=T)
+data2=read.table('~/Google Drive/HCP_graph/1200/datasets/timeseries.csv',sep=',',header=T)
+```
+
+# Looking at the interaction term
+```{r} 
+names(data)
+sub_int<-subset(data, data$contrast == 'int')
+```
+```{r}
+int_13_pos<-subset(sub_int, sub_int$IC == 'IC13' & sub_int$valence == 'positive')
+int_13_pos$mod<-as.factor(int_13_pos$mod)
+levels(int_13_pos$mod)
+```
+
+```{r}
+m1<-lm(cc~mod, data=int_13_pos)
+m1.1<-lm(btw~mod, data=int_13_pos)
+
+Contrasts = list(
+                 v02 = c(1, 0,-1,  0,  0,  0, 0),
+                 v03 = c(1,  0, 0,-1, 0, 0, 0),
+                 v04 = c(1,  0,  0,  0,  -1,  0, 0),
+                 v05 = c(1,  0,  0,  0,  0,  -1, 0),
+                 v23 = c(0,  0,  1,  -1,  0,  0, 0),
+                 v24 = c(0,  0,  1,  0,  -1,  0, 0),
+                 v25 = c(0,  0,  1,  0,  0,  -1, 0),
+                 v26 = c(0,  0,  0,  0,  0,  0, 0),
+                 v34 = c(0,  0,  0,  1,  -1,  0, 0),
+                 v35 = c(0,  0,  0,  1,  0,  -1, 0),
+                 v36 = c(0,  0,  0,  0,  0,  0, 0),
+                 v45 = c(0,  0,  0,  0,  1,  -1, 0)
+                 )
+leastsquare = lsmeans(m1, "mod")
+leastsquare1.1 = lsmeans(m1.1, "mod")
+```
+```{r}
+summary(m1.1)
+```
+## Table 1
+```{r}
+contrast(leastsquare1.1, Contrasts, adjust="sidak")
+```
+
+```{r}
+lm.beta(m1)
+```
+
+
+```{r}
+# Basic violin plot
+p1 <- ggplot(subset(int_13_pos, int_13_pos$mod != '1' | int_13_pos$mod != '6'), aes(x=mod, y=cc, color=mod)) + 
+  geom_violin()+theme_classic()
+p1
+
+p1.1 <- ggplot(subset(int_13_pos, int_13_pos$mod != '1' | int_13_pos$mod != '6'), aes(x=mod, y=btw, color=mod)) + 
+  geom_violin()+theme_classic()
+p1.1
+```
+# Summary
+The 0 module made up of the interaction term between BMI and age at onset of menstruation, BMI, race, age, and head motion has significantly lower clustering coefficents compared modules 2, 4, and 5 (Table 1). Modules 1 and 6 were omitted as they had less than two datapoints. However, in IC13, module 0 did not differ from the other modules in terms of betweenness centrality.  
+
+```{r}
+int_6_pos<-subset(sub_int, sub_int$IC == 'IC6' & sub_int$valence == 'positive')
+
+int_6_pos$mod<-as.factor(int_6_pos$mod)
+levels(int_6_pos$mod)
+describeBy(int_6_pos$cc, int_6_pos$mod)
+```
+Group 1, 5 exclude n <= 2
+10 factors
+```{r}
+m2<-lm(cc~mod, data=int_6_pos)
+m2.1<-lm(btw~mod, data=int_6_pos)
+
+Contrasts2 = list(
+                 v02 = c(1,  0,  -1,  0,  0,  0,  0,  0,  0,  0,  0),
+                 v03 = c(1,  0,  0,  -1,  0,  0,  0,  0,  0,  0,  0),
+                 v04 = c(1,  0,  0,  0,  -1,  0,  0,  0,  0,  0,  0),
+                 v06 = c(1,  0,  0,  0,  0,  0,  -1,  0,  0,  0,  0),
+                 v23 = c(0,  0,  1,  -1,  0,  0,  0,  0,  0,  0,  0),
+                 v24 = c(0,  0,  1,  0,  -1,  0,  0,  0,  0,  0,  0),
+                 v26 = c(0,  0,  1,  0,  0,  0,  -1,  0,  0,  0,  0),
+                 v34 = c(0,  0,  0,  1,  -1,  0,  0,  0,  0,  0,  0),
+                 v36 = c(0,  0,  0,  1,  0,  -1,  0,  0,  0,  0,  0),
+                 v46 = c(0,  0,  0,  0,  1,  0,  -1,  0,  0,  0,  0)
+                 )
+leastsquare2 = lsmeans(m2, "mod")
+leastsquare2.1 = lsmeans(m2.1, "mod")
+```
+
+```{r}
+summary(m2.1)
+```
+## Table 2
+```{r}
+contrast(leastsquare2.1, Contrasts2, adjust="sidak")
+```
+
+```{r}
+lm.beta(m2.1)
+```
+
+
+```{r}
+p2 <- ggplot(subset(int_6_pos, int_6_pos$mod != '1' | int_6_pos$mod != '5'), aes(x=mod, y=cc, color=mod)) + 
+  geom_violin()+theme_classic()
+p2
+
+p2.1 <- ggplot(subset(int_6_pos, int_6_pos$mod != '1' | int_6_pos$mod != '5'), aes(x=mod, y=btw, color=mod)) + 
+  geom_violin()+theme_classic()
+p2.1
+```
+# Summary
+Within IC6, module 0 comprised of BMI, the interaction betweeen BMI and age at onset of menstruation, race, age, head motion, the right intraparietal, and precuneus exhibited decreased clustering coffiecents compared to all other modules. Compared to the other modules, there was no difference in betweenness centrality.  
+
+```{r}
+int_2_pos<-subset(sub_int, sub_int$IC == 'IC2' & sub_int$valence == 'positive')
+int_2_pos$mod<-as.factor(int_2_pos$mod)
+levels(int_2_pos$mod)
+summary(int_2_pos$mod)
+```
+
+```{r}
+m3<-lm(cc~mod, data=int_2_pos)
+m3.1<-lm(btw~mod, data=int_2_pos)
+Contrasts3 = list(
+                 v02 = c(1, 0, -1, 0, 0, 0, 0, 0, 0),
+                 v03 = c(1, 0, 0,-1, 0, 0, 0, 0, 0),
+                 v04 = c(1, 0, 0, 0, -1, 0, 0, 0, 0),
+                 v05 = c(1, 0, 0, 0, 0, -1, 0, 0, 0),
+                 v06 = c(1, 0, 0, 0, 0, 0, -1, 0, 0),
+                 v23 = c(0, 0, 1, -1, 0, 0, 0, 0, 0),
+                 v24 = c(0, 0, 1, 0, -1, 0, 0, 0, 0),
+                 v25 = c(0, 0, 1, 0, 0, -1, 0, 0, 0),
+                 v26 = c(0, 0, 1, 0, 0, 0, -1, 0, 0),
+                 v34 = c(0, 0, 0,  1,  -1,  0, 0, 0, 0),
+                 v35 = c(0, 0, 0,  1, 0, -1, 0, 0, 0),
+                 v36 = c(0, 0, 0,  1, 0, 0, -1, 0, 0),
+                 v45 = c(0, 0, 0,  0, 1, -1, 0, 0, 0),
+                 v46 = c(0, 0, 0,  0, 1, 0, -1, 0, 0),
+                 v56 = c(0, 0, 0,  0, 0, 1, -1, 0, 0)
+                 )
+leastsquare3 = lsmeans(m3, "mod")
+leastsquare3.1 = lsmeans(m3.1, "mod")
+```
+
+```{r}
+summary(m3.1)
+```
+## Table 3
+```{r}
+contrast(leastsquare3.1, Contrasts3, adjust="sidak")
+```
+
+```{r}
+lm.beta(m3.1)
+```
+
+
+```{r}
+# Basic violin plot
+p3 <- ggplot(subset(int_2_pos, int_2_pos$mod != '7' | int_2_pos$mod != '8'), aes(x=mod, y=cc, color=mod)) + 
+  geom_violin()+theme_classic()
+p3
+
+p3.1 <- ggplot(subset(int_2_pos, int_2_pos$mod != '7' | int_2_pos$mod != '8'), aes(x=mod, y=btw, color=mod)) + 
+  geom_violin()+theme_classic()
+p3.1
+```
+#Summary
+Within IC2, the 0 module comprised of BMI, the interaction between BMI and age at onset of menstruation, race, age, head motion, and the right intraparietal area exhibited a lower clustering coefficent compared to all other modules. No difference in betweenness centrality among the modules. 
+
+#Summary of IC3 and IC12
+IC3 and IC12 both had modules comprised of only the interaction between BMI and age at onset of menstruation. 
