@@ -6,7 +6,7 @@ output:
 ---
 
 # Visualizations in wb_view
-
+# Further analysis in jupyter
 ```{r, message=FALSE, warning=FALSE}
 library(plyr)
 library(psych)
