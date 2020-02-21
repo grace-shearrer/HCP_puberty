@@ -1240,3 +1240,96 @@ names(glm)<-c("Subject", "group","BMI_C","AOM_C","int","race","age")
 
 write.table(cbind(d4m$Subject,d4m$group,d4m$BMI_C,d4m$AOM_C,d4m$int,d4m$race,d4m$age,d4m$motion), "~/Google Drive/HCP_graph/1200/datasets/subs510.csv", sep=",")
 ```
+
+
+
+
+
+```{r}
+node_df<-read.table("~/Google Drive/HCP_graph/1200/datasets/early_late_nodes.csv", header=TRUE, sep=",")
+edge_df<-read.table("~/Google Drive/HCP_graph/1200/datasets/early_late_edges.csv", header = TRUE, sep=",")
+head(node_df)
+node_df$module<-as.factor(node_df$module)
+names(node_df)
+```
+
+```{r}
+node_int<-subset(node_df, node_df$group == 'int')
+node_int6<-subset(node_df, node_df$IC == 'IC6')
+node_int6$module<-as.factor(node_int6$module)
+node_int3<-subset(node_df, node_df$IC == 'IC3')
+node_int3$module<-as.factor(node_int3$module)
+node_int12<-subset(node_df, node_df$IC == 'IC12')
+node_int12$module<-as.factor(node_int12$module)
+node_int13<-subset(node_df, node_df$IC == 'IC13')
+node_int13$module<-as.factor(node_int13$module)
+node_int2<-subset(node_df, node_df$IC == 'IC2')
+node_int2$module<-as.factor(node_int2$module)
+```
+
+
+```{r}
+levels(node_int6$module)
+levels(node_int6$early_late)
+freqin6 <- xtabs(~early_late+module, data=node_int6)
+ftable(freqin6) # print table
+summary(freqin6)
+
+node_int6<-node_int6[!(node_int6$module=="7" | node_int6$module=="8" | node_int6$module=="9"),]
+node_int6$module<-factor(node_int6$module)
+levels(node_int6$module)
+
+c01<-c(1,-1,0,0,0,0,0)
+c02<-c(1,0,-1,0,0,0,0)
+c03<-c(1,0,0,-1,0,0,0)
+c04<-c(1,0,0,0,-1,0,0)
+c05<-c(1,0,0,0,0,-1,0)
+c06<-c(1,0,0,0,0,0,-1)
+c12<-c(0,1,-1,0,0,0,0)
+c13<-c(0,1,0,-1,0,0,0)
+c14<-c(0,1,0,0,-1,0,0)
+c15<-c(0,1,0,0,0,-1,0)
+c16<-c(0,1,0,0,0,0,-1)
+c23<-c(0,0,1,-1,0,0,0)
+c24<-c(0,0,1,0,-1,0,0)
+c25<-c(0,0,1,0,0,-1,0)
+c26<-c(0,0,1,0,0,0,-1)
+c34<-c(0,0,0,1,-1,0,0)
+c35<-c(0,0,0,1,0,-1,0)
+c36<-c(0,0,0,1,0,0,-1)
+c45<-c(0,0,0,0,1,-1,0)
+c46<-c(0,0,0,0,1,0,-1)
+c56<-c(0,0,0,0,0,1,-1)
+contrasts(node_int6$module)<-cbind(c01,c02,c03,c04,c05,c06,c12,c13,c01,c14,c15,c16,c23,c24,c25,c26,c34,c35,c36,c45,c46,c56)
+
+cel<-c(1,-1)
+contrasts(node_int6$early_late)<-cbind(cel)
+```
+
+
+```{r}
+library(phia)
+library(nlme)
+
+cc6.1<-lme(cc~module*early_late, random = ~1|early_late/module, data=node_int6, method="ML")
+summary(cc6.1)
+interactionMeans(cc6.1,fixed="early_late", across="module")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
