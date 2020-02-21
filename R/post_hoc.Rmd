@@ -30,6 +30,8 @@ library(tidyverse)
 library(broom)
 library(lmSupport)
 library(MuMIn)
+library(phia)
+library(nlme)
 #devtools::install_github("malcolmbarrett/ggdag")
 #devtools::install_github("kkholst/lava")  
 #devtools::install_github("kkholst/mets")  
@@ -1278,53 +1280,71 @@ summary(freqin6)
 node_int6<-node_int6[!(node_int6$module=="7" | node_int6$module=="8" | node_int6$module=="9"),]
 node_int6$module<-factor(node_int6$module)
 levels(node_int6$module)
-
-c01<-c(1,-1,0,0,0,0,0)
-c02<-c(1,0,-1,0,0,0,0)
-c03<-c(1,0,0,-1,0,0,0)
-c04<-c(1,0,0,0,-1,0,0)
-c05<-c(1,0,0,0,0,-1,0)
-c06<-c(1,0,0,0,0,0,-1)
-c12<-c(0,1,-1,0,0,0,0)
-c13<-c(0,1,0,-1,0,0,0)
-c14<-c(0,1,0,0,-1,0,0)
-c15<-c(0,1,0,0,0,-1,0)
-c16<-c(0,1,0,0,0,0,-1)
-c23<-c(0,0,1,-1,0,0,0)
-c24<-c(0,0,1,0,-1,0,0)
-c25<-c(0,0,1,0,0,-1,0)
-c26<-c(0,0,1,0,0,0,-1)
-c34<-c(0,0,0,1,-1,0,0)
-c35<-c(0,0,0,1,0,-1,0)
-c36<-c(0,0,0,1,0,0,-1)
-c45<-c(0,0,0,0,1,-1,0)
-c46<-c(0,0,0,0,1,0,-1)
-c56<-c(0,0,0,0,0,1,-1)
-contrasts(node_int6$module)<-cbind(c01,c02,c03,c04,c05,c06,c12,c13,c01,c14,c15,c16,c23,c24,c25,c26,c34,c35,c36,c45,c46,c56)
-
-cel<-c(1,-1)
-contrasts(node_int6$early_late)<-cbind(cel)
 ```
+
 
 
 ```{r}
-library(phia)
-library(nlme)
+cc6<-lm(cc~module*early_late, data=node_int6)
+means.mod <- lsmeans(cc6, specs = "module")
+means.el  <- lsmeans(cc6, specs = "early_late")
+means.int <- lsmeans(cc6, specs = c("module", "early_late"))
+means.int
+pairs(means.int, adjust = "bon")
+```
+# Summary 
+There is an overall difference between early and late in clustering coefficient.
+There is an overall difference between early and late in module 0 
+```{r}
+# Basic violin plot
+cc6p <- ggplot(node_int6, aes(x=module, y=cc, color=module, fill=module)) + 
+  geom_violin()+ facet_grid( . ~ early_late)+theme_classic()
+cc6p
+```
 
-cc6.1<-lme(cc~module*early_late, random = ~1|early_late/module, data=node_int6, method="ML")
-summary(cc6.1)
-interactionMeans(cc6.1,fixed="early_late", across="module")
+```{r}
+btw6<-lm(btw~module*early_late, data=node_int6)
+
+means.btwmod <- lsmeans(btw6, specs = "module")
+means.btwel  <- lsmeans(btw6, specs = "early_late")
+means.btwint <- lsmeans(btw6, specs = c("module", "early_late"))
+means.btwint
+pairs(means.btwint, adjust = "bon")
+
+```
+# Summary
+Difference between early and late in module 1
+```{r}
+# Basic violin plot
+btw6p <- ggplot(node_int6, aes(x=module, y=btw, color=module, fill=module)) + 
+  geom_violin()+ facet_grid( . ~ early_late)+theme_classic()
+btw6p
 ```
 
 
 
+```{r}
+levels(node_int3$module)
+levels(node_int3$early_late)
+freqin3 <- xtabs(~early_late+module, data=node_int3)
+ftable(freqin3) # print table
+summary(freqin3)
+
+node_int3<-node_int3[!(node_int3$module=="5" | node_int3$module=="6"  | node_int3$module=="7" | node_int3$module=="8" | node_int3$module=="9"),]
+node_int3$module<-factor(node_int3$module)
+levels(node_int3$module)
+```
 
 
 
-
-
-
-
+```{r}
+cc3<-lm(cc~module*early_late, data=node_int3)
+means.mod3 <- lsmeans(cc3, specs = "module")
+means.el3  <- lsmeans(cc3, specs = "early_late")
+means.int3 <- lsmeans(cc3, specs = c("module", "early_late"))
+means.int3
+pairs(means.int3, adjust = "bon")
+```
 
 
 
