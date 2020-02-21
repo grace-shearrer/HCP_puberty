@@ -1315,6 +1315,23 @@ pairs(means.btwint, adjust = "bon")
 ```
 # Summary
 Difference between early and late in module 1
+
+```{r}
+node_int6_mod1<-subset(node_int6, node_int6$module == "1")
+levels(node_int6_mod1$module)
+node_int6_mod1$module<-factor(node_int6_mod1$module)
+node_int6_mod1$module
+levels(node_int6_mod1$early_late)
+
+node_int6_mod1$node <- droplevels(node_int6_mod1$node)
+freqin6mod1<-with(node_int6_mod1, table(early_late,node))
+freqin6mod1
+summary(freqin6mod1) 
+```
+# Summary
+No difference in the composition, rather a true difference in clustering coefficient.
+243 338 369 60 63 96 AoM
+
 ```{r}
 # Basic violin plot
 btw6p <- ggplot(node_int6, aes(x=module, y=btw, color=module, fill=module)) + 
@@ -1346,8 +1363,24 @@ means.int3
 pairs(means.int3, adjust = "bon")
 ```
 
-#Summary
+# Summary
 Trending difference between early and late in module 2
+
+# Within module 1 differences
+```{r}
+node_int3_mod2<-subset(node_int3, node_int3$module == "2")
+levels(node_int3_mod2$module)
+node_int3_mod2$module<-factor(node_int3_mod2$module)
+node_int3_mod2$module
+levels(node_int3_mod2$early_late)
+
+node_int3_mod2$node <- droplevels(node_int3_mod2$node)
+freqin3mod2<-with(node_int3_mod2, table(early_late,node))
+freqin3mod2
+summary(freqin3mod2) 
+```
+# Summary
+Differences in the node distribution. The late has 19 199 203 204 23 24. Early only has race. 
 
 ```{r}
 # Basic violin plot
@@ -1390,8 +1423,23 @@ pairs(means.int12, adjust = "bon")
 #Summary 
 Trending difference in module 1 between early and late 0.0533 
 
-# Within module differences
+# Within module 1 differences
+```{r}
+node_int12_mod1<-subset(node_int12, node_int12$module == "1")
+levels(node_int12_mod1$module)
+node_int12_mod1$module<-factor(node_int12_mod1$module)
+node_int12_mod1$module
+levels(node_int12$early_late)
+freqin12mod1 <- xtabs(~early_late+node, data=node_int12_mod1)
+ftable(freqin12mod1) # print table
 
+node_int12_mod1$node <- droplevels(node_int12_mod1$node)
+freqin12mod1<-with(node_int12_mod1, table(early_late,node))
+freqin12mod1
+summary(freqin12mod1) 
+```
+# Summary
+Slight difference in composition of the module between early and late
 
 
 
