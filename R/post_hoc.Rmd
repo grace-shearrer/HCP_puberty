@@ -1390,6 +1390,11 @@ pairs(means.int12, adjust = "bon")
 #Summary 
 Trending difference in module 1 between early and late 0.0533 
 
+# Within module differences
+
+
+
+
 ```{r}
 # Basic violin plot
 cc12p <- ggplot(node_int12, aes(x=module, y=cc, color=module, fill=module)) + 
