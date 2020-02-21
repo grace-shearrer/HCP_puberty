@@ -8,6 +8,7 @@ output:
 # Visualizations in wb_view
 # Further analysis in jupyter
 ```{r, message=FALSE, warning=FALSE}
+library(lsmeans)
 library(plyr)
 library(psych)
 library(ggplot2)
@@ -1328,7 +1329,6 @@ levels(node_int3$module)
 levels(node_int3$early_late)
 freqin3 <- xtabs(~early_late+module, data=node_int3)
 ftable(freqin3) # print table
-summary(freqin3)
 
 node_int3<-node_int3[!(node_int3$module=="5" | node_int3$module=="6"  | node_int3$module=="7" | node_int3$module=="8" | node_int3$module=="9"),]
 node_int3$module<-factor(node_int3$module)
@@ -1346,10 +1346,98 @@ means.int3
 pairs(means.int3, adjust = "bon")
 ```
 
+#Summary
+Trending difference between early and late in module 2
+
+```{r}
+# Basic violin plot
+cc3p <- ggplot(node_int3, aes(x=module, y=btw, color=module, fill=module)) + 
+  geom_violin()+ facet_grid( . ~ early_late)+theme_classic()
+cc3p
+```
 
 
 
+```{r}
+btw3<-lm(btw~module*early_late, data=node_int3)
+means.mod3btw <- lsmeans(btw3, specs = "module")
+means.el3btw  <- lsmeans(btw3, specs = "early_late")
+means.int3btw <- lsmeans(btw3, specs = c("module", "early_late"))
+means.int3btw
+pairs(means.int3btw, adjust = "bon")
+```
+#Summary
+No differences
+```{r}
+levels(node_int12$module)
+levels(node_int12$early_late)
+freqin12 <- xtabs(~early_late+module, data=node_int12)
+ftable(freqin12) # print table
 
+node_int12<-node_int12[!(node_int12$module=="5" | node_int12$module=="6"  | node_int12$module=="7" | node_int12$module=="8" | node_int12$module=="9"),]
+node_int12$module<-factor(node_int12$module)
+levels(node_int12$module)
+```
 
+```{r}
+cc12<-lm(cc~module*early_late, data=node_int12)
+means.mod12 <- lsmeans(cc12, specs = "module")
+means.el12  <- lsmeans(cc12, specs = "early_late")
+means.int12 <- lsmeans(cc12, specs = c("module", "early_late"))
+means.int12
+pairs(means.int12, adjust = "bon")
+```
+#Summary 
+Trending difference in module 1 between early and late 0.0533 
 
+```{r}
+# Basic violin plot
+cc12p <- ggplot(node_int12, aes(x=module, y=cc, color=module, fill=module)) + 
+  geom_violin()+ facet_grid( . ~ early_late)+theme_classic()
+cc12p
+```
+
+```{r}
+btw12<-lm(btw~module*early_late, data=node_int12)
+means.mod12btw <- lsmeans(btw12, specs = "module")
+means.el12btw  <- lsmeans(btw12, specs = "early_late")
+means.int12btw <- lsmeans(btw12, specs = c("module", "early_late"))
+means.int12btw
+pairs(means.int12btw, adjust = "bon")
+```
+# Summary
+No difference in module betweenness between early and late
+
+```{r}
+levels(node_int13$module)
+levels(node_int13$early_late)
+freqin13 <- xtabs(~early_late+module, data=node_int13)
+ftable(freqin13) # print table
+
+node_int13<-node_int13[!( node_int13$module=="6"  | node_int13$module=="7" | node_int13$module=="8" | node_int13$module=="9"),]
+node_int13$module<-factor(node_int13$module)
+levels(node_int13$module)
+```
+
+```{r}
+cc13<-lm(cc~module*early_late, data=node_int13)
+means.mod13 <- lsmeans(cc13, specs = "module")
+means.el13  <- lsmeans(cc13, specs = "early_late")
+means.int13 <- lsmeans(cc13, specs = c("module", "early_late"))
+means.int13
+pairs(means.int13, adjust = "bon")
+```
+# Summary
+No differences in clustering coefficient between early and late in any module.
+
+```{r}
+btw13<-lm(btw~module*early_late, data=node_int13)
+means.mod13btw <- lsmeans(btw13, specs = "module")
+means.el13btw  <- lsmeans(btw13, specs = "early_late")
+means.int13btw <- lsmeans(btw13, specs = c("module", "early_late"))
+means.int13btw
+pairs(means.int13btw, adjust = "bon")
+```
+# Summary
+No difference in the betweenness centrality between early and late in any modules
 
