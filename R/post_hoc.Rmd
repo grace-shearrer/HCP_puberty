@@ -1280,51 +1280,8 @@ summary(freqin6)
 node_int6<-node_int6[!(node_int6$module=="7" | node_int6$module=="8" | node_int6$module=="9"),]
 node_int6$module<-factor(node_int6$module)
 levels(node_int6$module)
-
-c0<-c(2,0,0,0,0,0,0)
-c1<-c(0,2,0,0,0,0,0)
-c2<-c(0,0,2,0,0,0,0)
-c3<-c(0,0,0,2,0,0,0)
-c4<-c(0,0,0,0,2,0,0)
-c5<-c(0,0,0,0,0,2,0)
-c6<-c(0,0,0,0,0,0,2)
-c01<-c(1,-1,0,0,0,0,0)
-c02<-c(1,0,-1,0,0,0,0)
-c03<-c(1,0,0,-1,0,0,0)
-c04<-c(1,0,0,0,-1,0,0)
-c05<-c(1,0,0,0,0,-1,0)
-c06<-c(1,0,0,0,0,0,-1)
-c12<-c(0,1,-1,0,0,0,0)
-c13<-c(0,1,0,-1,0,0,0)
-c14<-c(0,1,0,0,-1,0,0)
-c15<-c(0,1,0,0,0,-1,0)
-c16<-c(0,1,0,0,0,0,-1)
-c23<-c(0,0,1,-1,0,0,0)
-c24<-c(0,0,1,0,-1,0,0)
-c25<-c(0,0,1,0,0,-1,0)
-c26<-c(0,0,1,0,0,0,-1)
-c34<-c(0,0,0,1,-1,0,0)
-c35<-c(0,0,0,1,0,-1,0)
-c36<-c(0,0,0,1,0,0,-1)
-c45<-c(0,0,0,0,1,-1,0)
-c46<-c(0,0,0,0,1,0,-1)
-c56<-c(0,0,0,0,0,1,-1)
-contrasts(node_int6$module)<-cbind(c1,c2,c3,c4,c5,c6,c01,c02,c03,c04,c05,c06,c12,c13,c01,c14,c15,c16,c23,c24,c25,c26,c34,c35,c36,c45,c46,c56)
-Contrasts<-list(cbind(c1,c2,c3,c4,c5,c6,c01,c02,c03,c04,c05,c06,c12,c13,c01,c14,c15,c16,c23,c24,c25,c26,c34,c35,c36,c45,c46,c56))
-cel<-c(1,-1)
-contrasts(node_int6$early_late)<-cbind(cel)
 ```
 
-```{r}
-modByel<-list(
-c(1,0,0,0,0,0,0,-1,0,0,0,0,0,0),
-c(0,1,0,0,0,0,0,0,-1,0,0,0,0,0),
-c(0,0,1,0,0,0,0,0,0,-1,0,0,0,0),
-c(0,0,0,1,0,0,0,0,0,0,-1,0,0,0),
-c(0,0,0,0,1,0,0,0,0,0,0,-1,0,0),
-c(0,0,0,0,0,1,0,0,0,0,0,0,-1,0),
-c(0,0,0,0,0,0,1,0,0,0,0,0,0,-1))
-```
 
 
 ```{r}
@@ -1335,24 +1292,9 @@ means.int <- lsmeans(cc6, specs = c("module", "early_late"))
 means.int
 pairs(means.int, adjust = "bon")
 ```
-
-
-
-```{r}
-cc6<-lm(cc~module*early_late, data=node_int6)
-summary(cc6)
-interactionMeans(cc6)
-testInteractions(cc6)
-library(lsmeans)
-leastsquare = lsmeans(cc6, "module")
-means.int <- lsmeans(cc6, specs = c("module", "early_late"))
-contrast(leastsquare, Contrasts, adjust="sidak")
-contrast(means.wool, list(AvB = c(-1,1)))
-```
 # Summary 
 There is an overall difference between early and late in clustering coefficient.
-There is an overall difference between early and late in modules2, 
-Between early and late puberty there is a difference in clustering coefficient between the 0 and 3 nodes.
+There is an overall difference between early and late in module 0 
 ```{r}
 # Basic violin plot
 cc6p <- ggplot(node_int6, aes(x=module, y=cc, color=module, fill=module)) + 
@@ -1361,14 +1303,17 @@ cc6p
 ```
 
 ```{r}
-btw6.1<-lme(btw~module*early_late, random = ~1|early_late/module, data=node_int6, method="ML")
-summary(btw6.1)
-interactionMeans(btw6.1)
-testInteractions(btw6.1)
+btw6<-lm(btw~module*early_late, data=node_int6)
 
+means.btwmod <- lsmeans(btw6, specs = "module")
+means.btwel  <- lsmeans(btw6, specs = "early_late")
+means.btwint <- lsmeans(btw6, specs = c("module", "early_late"))
+means.btwint
+pairs(means.btwint, adjust = "bon")
 
 ```
-
+# Summary
+Difference between early and late in module 1
 ```{r}
 # Basic violin plot
 btw6p <- ggplot(node_int6, aes(x=module, y=btw, color=module, fill=module)) + 
@@ -1378,10 +1323,28 @@ btw6p
 
 
 
+```{r}
+levels(node_int3$module)
+levels(node_int3$early_late)
+freqin3 <- xtabs(~early_late+module, data=node_int3)
+ftable(freqin3) # print table
+summary(freqin3)
+
+node_int3<-node_int3[!(node_int3$module=="5" | node_int3$module=="6"  | node_int3$module=="7" | node_int3$module=="8" | node_int3$module=="9"),]
+node_int3$module<-factor(node_int3$module)
+levels(node_int3$module)
+```
 
 
 
-
+```{r}
+cc3<-lm(cc~module*early_late, data=node_int3)
+means.mod3 <- lsmeans(cc3, specs = "module")
+means.el3  <- lsmeans(cc3, specs = "early_late")
+means.int3 <- lsmeans(cc3, specs = c("module", "early_late"))
+means.int3
+pairs(means.int3, adjust = "bon")
+```
 
 
 
