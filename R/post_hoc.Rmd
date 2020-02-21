@@ -6,7 +6,7 @@ output:
 ---
 
 # Visualizations in wb_view
-
+# Further analysis in jupyter
 ```{r, message=FALSE, warning=FALSE}
 library(plyr)
 library(psych)
@@ -39,7 +39,7 @@ bwPalette<-c("#000000", "#999999", "CCCCCC","666666","333333")
 
 ## Loading datasets and combining
 ```{r, echo=FALSE, warning=FALSE,message=FALSE}
-unres<-read.table("~/Google Drive/HCP_graph/1200/datasets/unrestricted_gshearrer_7_24_2019_11_58_3.csv", header=T, sep=",")
+unres<-read.table("~/Google Drive/HCP_graph/1200/datasets/unrestricted_gshearrer_4_19_2018_11_31_37.csv", header=T, sep=",")
 res<-read.table("~/Google Drive/HCP_graph/1200/datasets/RESTRICTED_gshearrer_4_19_2018_11_33_34.csv", header=T, sep=",")
 interest<-read.table("~/Google Drive/HCP_graph/1200/5000perms/post_hoc/vars_of_interest.csv", sep=",", header=F)
 glm<-read.table("~/Google Drive/HCP_graph/1200/5000perms/glm.txt", sep="\t", header=F)
@@ -49,12 +49,16 @@ subs<-read.table("~/Google Drive/HCP_graph/1200/datasets/subjectIDs.txt", header
 names(subs)<-"Subject"
 netmat<-read.table("~/Google Drive/HCP_graph/1200/datasets/3T_HCP1200_MSMAll_d15_ts2_nets/netmats1.txt", header=F, sep=" ")
 
+summary(glm$group)
+
 NM<-cbind(subs,netmat)
 
 d0<-join(unres, res)
+
 d1<-join(d0,glm)
 
 d2<-d1[,colnames(d1)%in%interest$V1] 
+
 d3<-join(d2,NM)
 
 d4<-subset(d3, d3$group == 1)
@@ -328,6 +332,8 @@ d4$AoM[d4$Menstrual_AgeBegan<12]<-"early"
 d4$AoM[d4$Menstrual_AgeBegan>13]<-"late"
 
 summary(as.factor(d4$AoM))
+
+write.table(d4,"~/Google Drive/HCP_graph/1200/datasets/post_hoc.csv", sep=",", row.names = FALSE)
 ```
 # Significant positive AoMxBMI
 ## 12 (visual cortex)->13 (somatosensory - mouth) == V178  
@@ -998,8 +1004,6 @@ motion<-read.table("~/Google Drive/HCP_graph/1200/datasets/HCP1200-Motion-Summar
 head(motion)
 
 d4m<-join(d4,motion)
-
-names(d4m)
 ```
 
 ```{r}
