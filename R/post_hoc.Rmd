@@ -1256,46 +1256,79 @@ node_df$module<-as.factor(node_df$module)
 names(node_df)
 ```
 
+
 ```{r}
 node_int<-subset(node_df, node_df$group == 'int')
-node_int6<-subset(node_df, node_df$IC == 'IC6')
+summary(node_int$group)
+node_int6<-subset(node_int, node_int$IC == 'IC6')
 node_int6$module<-as.factor(node_int6$module)
-node_int3<-subset(node_df, node_df$IC == 'IC3')
+summary(node_int6)
+
+node_int3<-subset(node_int, node_int$IC == 'IC3')
 node_int3$module<-as.factor(node_int3$module)
-node_int12<-subset(node_df, node_df$IC == 'IC12')
+summary(node_int3)
+
+node_int12<-subset(node_int, node_int$IC == 'IC12')
 node_int12$module<-as.factor(node_int12$module)
-node_int13<-subset(node_df, node_df$IC == 'IC13')
+summary(node_int12)
+
+
+node_int13<-subset(node_int, node_int$IC == 'IC13')
 node_int13$module<-as.factor(node_int13$module)
-node_int2<-subset(node_df, node_df$IC == 'IC2')
+
+node_int2<-subset(node_int, node_int$IC == 'IC2')
 node_int2$module<-as.factor(node_int2$module)
 ```
 
-
+# IC 6
 ```{r}
 levels(node_int6$module)
 levels(node_int6$early_late)
+
 freqin6 <- xtabs(~early_late+module, data=node_int6)
 ftable(freqin6) # print table
 summary(freqin6)
 
 node_int6<-node_int6[!(node_int6$module=="7" | node_int6$module=="8" | node_int6$module=="9"),]
 node_int6$module<-factor(node_int6$module)
+
 levels(node_int6$module)
+freqin6.0 <- xtabs(~early_late+module, data=node_int6)
+ftable(freqin6.0) # print table
+summary(freqin6.0)
+
+node_int6$node <- droplevels(node_int6$node)
+
+freqin6.1 <- xtabs(~early_late+module+node, data=node_int6)
+ftable(freqin6.1) # print table
+summary(freqin6.1)
 ```
-
-
-
+# Summary
+No difference in the frequencies between modules in the late vs. early
+No difference in the composition of the nodes in the modules
 ```{r}
 cc6<-lm(cc~module*early_late, data=node_int6)
+summary(cc6)
+
 means.mod <- lsmeans(cc6, specs = "module")
 means.el  <- lsmeans(cc6, specs = "early_late")
+summary(means.el)
 means.int <- lsmeans(cc6, specs = c("module", "early_late"))
 means.int
 pairs(means.int, adjust = "bon")
+pairs(means.el, adjust = "bon")
 ```
 # Summary 
-There is an overall difference between early and late in clustering coefficient.
-There is an overall difference between early and late in module 0 
+No difference in CC
+
+```{r}
+describeBy(node_int6$cc, node_int6$early_late)
+cc6p0 <- ggplot(node_int6, aes(x=early_late, y=cc, color=early_late, fill=early_late)) + 
+  geom_violin()+ theme_classic()
+cc6p0
+```
+
+
 ```{r}
 # Basic violin plot
 cc6p <- ggplot(node_int6, aes(x=module, y=cc, color=module, fill=module)) + 
@@ -1311,36 +1344,13 @@ means.btwel  <- lsmeans(btw6, specs = "early_late")
 means.btwint <- lsmeans(btw6, specs = c("module", "early_late"))
 means.btwint
 pairs(means.btwint, adjust = "bon")
-
+pairs(means.btwel, adjust = "bon")
 ```
+
 # Summary
-Difference between early and late in module 1
+None
 
-```{r}
-node_int6_mod1<-subset(node_int6, node_int6$module == "1")
-levels(node_int6_mod1$module)
-node_int6_mod1$module<-factor(node_int6_mod1$module)
-node_int6_mod1$module
-levels(node_int6_mod1$early_late)
-
-node_int6_mod1$node <- droplevels(node_int6_mod1$node)
-freqin6mod1<-with(node_int6_mod1, table(early_late,node))
-freqin6mod1
-summary(freqin6mod1) 
-```
-# Summary
-No difference in the composition, rather a true difference in clustering coefficient.
-243 338 369 60 63 96 AoM
-
-```{r}
-# Basic violin plot
-btw6p <- ggplot(node_int6, aes(x=module, y=btw, color=module, fill=module)) + 
-  geom_violin()+ facet_grid( . ~ early_late)+theme_classic()
-btw6p
-```
-
-
-
+# IC 3
 ```{r}
 levels(node_int3$module)
 levels(node_int3$early_late)
@@ -1350,42 +1360,41 @@ ftable(freqin3) # print table
 node_int3<-node_int3[!(node_int3$module=="5" | node_int3$module=="6"  | node_int3$module=="7" | node_int3$module=="8" | node_int3$module=="9"),]
 node_int3$module<-factor(node_int3$module)
 levels(node_int3$module)
+
+
+
+freqin3.0 <- xtabs(~early_late+module, data=node_int3)
+ftable(freqin3.0) # print table
+summary(freqin3.0)
+
+node_int3$node <- droplevels(node_int3$node)
+
+freqin3.1 <- xtabs(~early_late+module+node, data=node_int3)
+ftable(freqin3.1) # print table
+summary(freqin3.1)
 ```
 
 
 
 ```{r}
 cc3<-lm(cc~module*early_late, data=node_int3)
+summary(cc3)
 means.mod3 <- lsmeans(cc3, specs = "module")
 means.el3  <- lsmeans(cc3, specs = "early_late")
 means.int3 <- lsmeans(cc3, specs = c("module", "early_late"))
 means.int3
 pairs(means.int3, adjust = "bon")
+pairs(means.el3, adjust = "bon")
 ```
 
 # Summary
-Trending difference between early and late in module 2
+No difference
 
-# Within module 1 differences
-```{r}
-node_int3_mod2<-subset(node_int3, node_int3$module == "2")
-levels(node_int3_mod2$module)
-node_int3_mod2$module<-factor(node_int3_mod2$module)
-node_int3_mod2$module
-levels(node_int3_mod2$early_late)
-
-node_int3_mod2$node <- droplevels(node_int3_mod2$node)
-freqin3mod2<-with(node_int3_mod2, table(early_late,node))
-freqin3mod2
-summary(freqin3mod2) 
-```
-# Summary
-Differences in the node distribution. The late has 19 199 203 204 23 24. Early only has race. 
 
 ```{r}
 # Basic violin plot
-cc3p <- ggplot(node_int3, aes(x=module, y=btw, color=module, fill=module)) + 
-  geom_violin()+ facet_grid( . ~ early_late)+theme_classic()
+cc3p <- ggplot(node_int3, aes(x=early_late, y=cc, color=early_late, fill=early_late)) + 
+  geom_violin()+ theme_classic()
 cc3p
 ```
 
@@ -1396,101 +1405,409 @@ btw3<-lm(btw~module*early_late, data=node_int3)
 means.mod3btw <- lsmeans(btw3, specs = "module")
 means.el3btw  <- lsmeans(btw3, specs = "early_late")
 means.int3btw <- lsmeans(btw3, specs = c("module", "early_late"))
-means.int3btw
-pairs(means.int3btw, adjust = "bon")
+means.el3btw
+pairs(means.el3btw, adjust = "bon")
 ```
 #Summary
 No differences
+
+# IC 12
 ```{r}
 levels(node_int12$module)
 levels(node_int12$early_late)
+
 freqin12 <- xtabs(~early_late+module, data=node_int12)
 ftable(freqin12) # print table
 
-node_int12<-node_int12[!(node_int12$module=="5" | node_int12$module=="6"  | node_int12$module=="7" | node_int12$module=="8" | node_int12$module=="9"),]
+node_int12<-node_int12[!(node_int12$module=="5" | node_int12$module=="6" | node_int12$module=="7" | node_int12$module=="8" | node_int12$module=="9"),]
 node_int12$module<-factor(node_int12$module)
+
 levels(node_int12$module)
-```
+freqin12.0 <- xtabs(~early_late+module, data=node_int12)
+ftable(freqin12.0) # print table
+summary(freqin12.0)
 
-```{r}
-cc12<-lm(cc~module*early_late, data=node_int12)
-means.mod12 <- lsmeans(cc12, specs = "module")
-means.el12  <- lsmeans(cc12, specs = "early_late")
-means.int12 <- lsmeans(cc12, specs = c("module", "early_late"))
-means.int12
-pairs(means.int12, adjust = "bon")
-```
-#Summary 
-Trending difference in module 1 between early and late 0.0533 
+node_int12$node <- droplevels(node_int12$node)
 
-# Within module 1 differences
-```{r}
-node_int12_mod1<-subset(node_int12, node_int12$module == "1")
-levels(node_int12_mod1$module)
-node_int12_mod1$module<-factor(node_int12_mod1$module)
-node_int12_mod1$module
-levels(node_int12$early_late)
-freqin12mod1 <- xtabs(~early_late+node, data=node_int12_mod1)
-ftable(freqin12mod1) # print table
-
-node_int12_mod1$node <- droplevels(node_int12_mod1$node)
-freqin12mod1<-with(node_int12_mod1, table(early_late,node))
-freqin12mod1
-summary(freqin12mod1) 
+freqin12.1 <- xtabs(~early_late+module+node, data=node_int12)
+ftable(freqin12.1) # print table
+summary(freqin12.1)
 ```
 # Summary
-Slight difference in composition of the module between early and late
-
-
-
+No difference in the frequencies between modules in the late vs. early
+No difference in the composition of the nodes in the modules
 ```{r}
-# Basic violin plot
-cc12p <- ggplot(node_int12, aes(x=module, y=cc, color=module, fill=module)) + 
-  geom_violin()+ facet_grid( . ~ early_late)+theme_classic()
-cc12p
+cc12<-lm(cc~module*early_late, data=node_int12)
+summary(cc12)
+
+means.mod12 <- lsmeans(cc12, specs = "module")
+means.el12  <- lsmeans(cc12, specs = "early_late")
+summary(means.el12)
+
+means.int12 <- lsmeans(cc12, specs = c("module", "early_late"))
+means.int12
+
+pairs(means.int12, adjust = "bon")
+pairs(means.el12, adjust = "bon")
 ```
+# Summary 
+No difference in CC
+
 
 ```{r}
 btw12<-lm(btw~module*early_late, data=node_int12)
-means.mod12btw <- lsmeans(btw12, specs = "module")
-means.el12btw  <- lsmeans(btw12, specs = "early_late")
-means.int12btw <- lsmeans(btw12, specs = c("module", "early_late"))
-means.int12btw
-pairs(means.int12btw, adjust = "bon")
+
+means.btwmod12 <- lsmeans(btw12, specs = "module")
+means.btwel12  <- lsmeans(btw12, specs = "early_late")
+means.btwint12 <- lsmeans(btw12, specs = c("module", "early_late"))
+means.btwint12
+pairs(means.btwint12, adjust = "bon")
+pairs(means.btwel12, adjust = "bon")
 ```
 # Summary
-No difference in module betweenness between early and late
+No differences in btw centrality 
 
+
+# IC 13
 ```{r}
 levels(node_int13$module)
 levels(node_int13$early_late)
+
 freqin13 <- xtabs(~early_late+module, data=node_int13)
 ftable(freqin13) # print table
 
-node_int13<-node_int13[!( node_int13$module=="6"  | node_int13$module=="7" | node_int13$module=="8" | node_int13$module=="9"),]
+node_int13<-node_int13[!(node_int13$module=="6" | node_int13$module=="7" | node_int13$module=="8" | node_int13$module=="9"),]
 node_int13$module<-factor(node_int13$module)
-levels(node_int13$module)
-```
 
-```{r}
-cc13<-lm(cc~module*early_late, data=node_int13)
-means.mod13 <- lsmeans(cc13, specs = "module")
-means.el13  <- lsmeans(cc13, specs = "early_late")
-means.int13 <- lsmeans(cc13, specs = c("module", "early_late"))
-means.int13
-pairs(means.int13, adjust = "bon")
+levels(node_int13$module)
+freqin13.0 <- xtabs(~early_late+module, data=node_int13)
+ftable(freqin13.0) # print table
+summary(freqin13.0)
+
+node_int13$node <- droplevels(node_int13$node)
+
+freqin13.1 <- xtabs(~early_late+module+node, data=node_int13)
+ftable(freqin13.1) # print table
+summary(freqin13.1)
 ```
 # Summary
-No differences in clustering coefficient between early and late in any module.
+No difference in the frequencies between modules in the late vs. early
+No difference in the composition of the nodes in the modules
+```{r}
+cc13<-lm(cc~module*early_late, data=node_int13)
+summary(cc13)
+
+means.mod13 <- lsmeans(cc13, specs = "module")
+means.el13  <- lsmeans(cc13, specs = "early_late")
+summary(means.el13)
+
+means.int13 <- lsmeans(cc13, specs = c("module", "early_late"))
+means.int13
+
+pairs(means.int13, adjust = "bon")
+pairs(means.el13, adjust = "bon")
+```
+# Summary 
+No difference in CC
+
 
 ```{r}
 btw13<-lm(btw~module*early_late, data=node_int13)
-means.mod13btw <- lsmeans(btw13, specs = "module")
-means.el13btw  <- lsmeans(btw13, specs = "early_late")
-means.int13btw <- lsmeans(btw13, specs = c("module", "early_late"))
-means.int13btw
-pairs(means.int13btw, adjust = "bon")
+
+means.btwmod13 <- lsmeans(btw13, specs = "module")
+means.btwel13  <- lsmeans(btw13, specs = "early_late")
+means.btwint13 <- lsmeans(btw13, specs = c("module", "early_late"))
+means.btwint13
+pairs(means.btwint13, adjust = "bon")
+pairs(means.btwel13, adjust = "bon")
+```
+
+
+
+# IC 2
+```{r}
+levels(node_int2$module)
+levels(node_int2$early_late)
+
+freqin2 <- xtabs(~early_late+module, data=node_int2)
+ftable(freqin2) # print table
+
+node_int2<-node_int2[!(node_int2$module=="8" | node_int2$module=="9"),]
+node_int2$module<-factor(node_int2$module)
+
+levels(node_int2$module)
+freqin2.0 <- xtabs(~early_late+module, data=node_int2)
+ftable(freqin2.0) # print table
+summary(freqin2.0)
+
+node_int2$node <- droplevels(node_int2$node)
+
+freqin2.1 <- xtabs(~early_late+module+node, data=node_int2)
+ftable(freqin2.1) # print table
+summary(freqin2.1)
 ```
 # Summary
-No difference in the betweenness centrality between early and late in any modules
+No difference in the frequencies between modules in the late vs. early
+No difference in the composition of the nodes in the modules
+```{r}
+cc2<-lm(cc~module*early_late, data=node_int2)
+summary(cc2)
 
+means.mod2 <- lsmeans(cc2, specs = "module")
+means.el2  <- lsmeans(cc2, specs = "early_late")
+summary(means.el2)
+
+means.int2 <- lsmeans(cc2, specs = c("module", "early_late"))
+means.int2
+
+pairs(means.int2, adjust = "bon")
+pairs(means.el2, adjust = "bon")
+```
+# Summary 
+Difference in clustering coefficient between early and late within module 0
+
+```{r}
+# Basic violin plot
+cc2p <- ggplot(node_int2, aes(x=module, y=cc, color=early_late, fill=early_late)) + 
+  geom_violin()+ theme_classic()
+cc2p
+```
+
+
+
+```{r}
+btw2<-lm(btw~module*early_late, data=node_int2)
+
+means.btwmod2 <- lsmeans(btw2, specs = "module")
+means.btwel2  <- lsmeans(btw2, specs = "early_late")
+means.btwint2 <- lsmeans(btw2, specs = c("module", "early_late"))
+means.btwint2
+pairs(means.btwint2, adjust = "bon")
+pairs(means.btwel2, adjust = "bon")
+```
+
+
+```{r}
+node_int2_mod0<-subset(node_int2, node_int2$module == '0')
+node_int2_mod0$module<-factor(node_int2_mod0$module)
+summary(node_int2_mod0$module)
+
+freqin2.0 <- xtabs(~early_late, data=node_int2_mod0)
+ftable(freqin2.0) # print table
+
+
+node_int2_mod0$node <- droplevels(node_int2_mod0$node)
+
+freqin2.01 <- xtabs(~early_late+node, data=node_int2_mod0)
+ftable(freqin2.01) # print table
+summary(freqin2.01)
+```
+
+```{r}
+describeBy(node_int2_mod0$cc, node_int2_mod0$early_late)
+cc2n<-lm(cc~node*early_late, data=node_int2_mod0)
+summary(cc2n)
+
+means.mod2 <- lsmeans(cc2n, specs = "node")
+means.el2  <- lsmeans(cc2n, specs = "early_late")
+summary(means.el2)
+
+means.int2 <- lsmeans(cc2, specs = c("node", "early_late"))
+means.int2
+
+pairs(means.int2, adjust = "bon")
+pairs(means.el2, adjust = "bon")
+```
+
+```{r}
+p <- ggplot(node_int2_mod0, aes(x =early_late, y = node)) 
+p+geom_point( aes(size=cc,colour=early_late))+theme(panel.background=element_blank())
+```
+
+# Edge analysis
+```{r}
+edge_int<-subset(edge_df, edge_df$group == 'int')
+summary(edge_int)
+edge_int$edgeID<- with(edge_int, paste0(x,y))
+edge_int$edgeID
+
+edge_int6<-subset(edge_int, edge_int$IC == 'IC6')
+summary(edge_int6)
+
+edge_int3<-subset(edge_int, edge_int$IC == 'IC3')
+summary(edge_int3)
+
+edge_int12<-subset(edge_int, edge_int$IC == 'IC12')
+summary(edge_int12)
+
+
+edge_int13<-subset(edge_int, edge_int$IC == 'IC13')
+
+edge_int2<-subset(edge_int, edge_int$IC == 'IC2')
+```
+
+```{r}
+eAll<-lm(edge_weight~early_late*IC, data=edge_int)
+summary(eAll)
+
+means.eAll  <- lsmeans(eAll, specs = c("early_late","IC"))
+summary(means.eAll)
+pairs(means.eAll, adjust = "bon")
+```
+
+
+# IC6
+```{r}
+edge_int6$edgeID<-factor(edge_int6$edgeID)
+freqin6e <- xtabs(~early_late+edgeID, data=edge_int6)
+ftable(freqin6e) # print table
+
+summary(edge_int6)
+
+edge_int6$edgeID <- droplevels(edge_int6$edgeID)
+freqin6e <- xtabs(~early_late+edgeID, data=edge_int6)
+ftable(freqin6e) # print table
+summary(freqin6e)
+
+summary(edge_int6$edge_weight)
+edge_int6_third<-subset(edge_int6,edge_int6$edge_weight >= 0.65)
+pe6 <- ggplot(edge_int6_third, aes(x =early_late, y = edgeID)) 
+pe6+geom_point( aes(size=edge_weight,colour=early_late))+theme(panel.background=element_blank())
+
+```
+
+```{r}
+e6<-lm(edge_weight~early_late, data=edge_int6)
+summary(e6)
+
+means.e6  <- lsmeans(e6, specs = "early_late")
+summary(means.e6)
+
+pairs(means.e6, adjust = "bon")
+
+# Basic violin plot
+e6p <- ggplot(edge_int6, aes(x=early_late, y=edge_weight, color=early_late, fill=early_late)) + 
+  geom_violin()+ theme_classic()
+e6p
+```
+
+#IC3
+```{r}
+edge_int3$edgeID<-factor(edge_int3$edgeID)
+freqin3e <- xtabs(~early_late+edgeID, data=edge_int3)
+ftable(freqin3e) # print table
+
+edge_int3$edgeID <- droplevels(edge_int3$edgeID)
+freqin3e <- xtabs(~early_late+edgeID, data=edge_int3)
+ftable(freqin3e) # print table
+summary(freqin3e)
+
+summary(edge_int3$edge_weight)
+edge_int3_third<-subset(edge_int3,edge_int3$edge_weight >= 0.65)
+pe3 <- ggplot(edge_int3_third, aes(x =early_late, y = edgeID)) 
+pe3+geom_point( aes(size=edge_weight,colour=early_late))+theme(panel.background=element_blank())
+```
+
+```{r}
+e3<-lm(edge_weight~early_late, data=edge_int3)
+summary(e3)
+
+means.e3  <- lsmeans(e3, specs = "early_late")
+summary(means.e3)
+
+pairs(means.e3, adjust = "bon")
+
+# Basic violin plot
+e3p <- ggplot(edge_int3, aes(x=early_late, y=edge_weight, color=early_late, fill=early_late)) + 
+  geom_violin()+ theme_classic()
+e3p
+```
+
+# IC12
+```{r}
+edge_int12$edgeID<-factor(edge_int12$edgeID)
+edge_int12$edgeID <- droplevels(edge_int12$edgeID)
+
+freqin12e <- xtabs(~early_late+edgeID, data=edge_int12)
+ftable(freqin12e) # print table
+summary(freqin12e)
+
+summary(edge_int12$edge_weight)
+edge_int12_third<-subset(edge_int12,edge_int12$edge_weight >= 0.65)
+pe12 <- ggplot(edge_int12_third, aes(x =early_late, y = edgeID)) 
+pe12+geom_point( aes(size=edge_weight,colour=early_late))+theme(panel.background=element_blank())
+```
+
+```{r}
+e12<-lm(edge_weight~early_late, data=edge_int12)
+summary(e12)
+
+means.e12  <- lsmeans(e12, specs = "early_late")
+summary(means.e12)
+
+pairs(means.e12, adjust = "bon")
+
+# Basic violin plot
+e12p <- ggplot(edge_int12, aes(x=early_late, y=edge_weight, color=early_late, fill=early_late)) + 
+  geom_violin()+ theme_classic()
+e12p
+```
+```{r}
+edge_int13$edgeID<-factor(edge_int13$edgeID)
+freqin13e <- xtabs(~early_late+edgeID, data=edge_int13)
+ftable(freqin13e) # print table
+
+summary(edge_int13)
+
+edge_int13$edgeID <- droplevels(edge_int13$edgeID)
+freqin13e <- xtabs(~early_late+edgeID, data=edge_int13)
+ftable(freqin13e) # print table
+summary(freqin13e)
+
+summary(edge_int13$edge_weight)
+edge_int13_third<-subset(edge_int13,edge_int13$edge_weight >= 0.85)
+pe13 <- ggplot(edge_int13_third, aes(x =early_late, y = edgeID)) 
+pe13+geom_point( aes(size=edge_weight,colour=early_late))+theme(panel.background=element_blank())
+```
+
+```{r}
+e13<-lm(edge_weight~early_late, data=edge_int13)
+summary(e13)
+
+means.e13  <- lsmeans(e13, specs = "early_late")
+summary(means.e13)
+
+pairs(means.e13, adjust = "bon")
+
+# Basic violin plot
+e13p <- ggplot(edge_int13, aes(x=early_late, y=edge_weight, color=early_late, fill=early_late)) + 
+  geom_violin()+ theme_classic()
+e13p
+```
+```{r}
+edge_int2$edgeID<-factor(edge_int2$edgeID)
+
+edge_int2$edgeID <- droplevels(edge_int2$edgeID)
+freqin2e <- xtabs(~early_late+edgeID, data=edge_int2)
+ftable(freqin2e) # print table
+summary(freqin2e)
+
+summary(edge_int2$edge_weight)
+edge_int2_third<-subset(edge_int2,edge_int2$edge_weight >= 0.7)
+pe2 <- ggplot(edge_int2_third, aes(x =early_late, y = edgeID)) 
+pe2+geom_point( aes(size=edge_weight,colour=early_late))+theme(panel.background=element_blank())
+```
+
+```{r}
+e2<-lm(edge_weight~early_late, data=edge_int2)
+
+means.e2  <- lsmeans(e2, specs = "early_late")
+summary(means.e2)
+
+pairs(means.e2, adjust = "bon")
+
+# Basic violin plot
+e2p <- ggplot(edge_int2, aes(x=early_late, y=edge_weight, color=early_late, fill=early_late)) + 
+  geom_violin()+ theme_classic()
+e2p
+```
