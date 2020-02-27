@@ -70,6 +70,7 @@ d4<-d4[!is.na(d4$V36),]
 #head(netmat)
 dim(d4)
 d4$BMI_C
+
 ```
 The missing check is OK. Lines up with imaging data.
 
@@ -170,6 +171,7 @@ summary(m2)
 m3<-lm( BMI ~  Menstrual_AgeBegan+Age_in_Yrs+Race, data=d4)
 lrtest(m2,m3)
 summary(m3)
+dim(d4)
 lm.beta(m3)
 effect.size(m3)
 modelEffectSizes(m3)
@@ -178,7 +180,8 @@ confint(m3)
 
 ```{r cleaning up for table}
 x<-as.data.frame(summary(m3)[4])
-row.names(x)<-c("Intercept","Menstrual age began (yrs)","Age (yrs)", "Asian American, Native Hawaiian, Other Pacific Islander", "Black or African American", "More than one race","Unknown race or not reported", "White")
+x
+row.names(x)<-c("Intercept","Menstrual age began (yrs)","Age (yrs)","Native American" ,"Asian American, Native Hawaiian, Other Pacific Islander", "Black or African American", "More than one race","Unknown race or not reported")
 x
 ```
 
@@ -1005,8 +1008,13 @@ It appears that the genetic contribution in this sample to BMI and Age of onset 
 ```{r}
 motion<-read.table("~/Google Drive/HCP_graph/1200/datasets/HCP1200-Motion-Summaries.csv", header=T, sep=",")
 head(motion)
+motion$mean_motion = with(motion, ave(x = motion, Subject, FUN = mean))
+motion<-motion[!duplicated(motion$Subject), ]
+head(motion)
 
 d4m<-join(d4,motion)
+
+describe(d4m$AOM_C)
 ```
 
 ```{r}
@@ -1019,6 +1027,7 @@ motion_graph<-ggplot(d4m, aes(BMI, motion)) +
 motion_graph
 ```
 ```{r}
+dim(d4m)
 mm1<-lm( BMI ~  motion, data=d4m)
 summary(mm1)
 mm2<-lm( BMI ~  motion+Age_in_Yrs, data=d4m)
@@ -1031,7 +1040,8 @@ mm4<-lm( BMI ~  motion+Menstrual_AgeBegan+Age_in_Yrs+Race, data=d4m)
 lrtest(mm3,mm4)
 summary(mm4) #menses is still significant even with motion parameters
 summary(m3)
-
+AICc(mm4)
+AICc(m3)
 lm.beta(mm4)
 effect.size(mm4)
 modelEffectSizes(mm4)
@@ -1629,7 +1639,6 @@ p+geom_point( aes(size=cc,colour=early_late))+theme(panel.background=element_bla
 edge_int<-subset(edge_df, edge_df$group == 'int')
 summary(edge_int)
 edge_int$edgeID<- with(edge_int, paste0(x,y))
-edge_int$edgeID
 
 edge_int6<-subset(edge_int, edge_int$IC == 'IC6')
 summary(edge_int6)
@@ -1653,6 +1662,22 @@ summary(eAll)
 means.eAll  <- lsmeans(eAll, specs = c("early_late","IC"))
 summary(means.eAll)
 pairs(means.eAll, adjust = "bon")
+means.eAll@V
+
+eEarly<-lm(edge_weight~IC, data=subset(edge_int,edge_int$early_late=='early'))
+summary(eEarly)
+means.eEarly  <- lsmeans(eEarly, specs = "IC")
+pairs(means.eEarly, adjust = "bon")
+
+eLate<-lm(edge_weight~IC, data=subset(edge_int,edge_int$early_late=='late'))
+summary(eLate)
+means.eLate  <- lsmeans(eLate, specs = "IC")
+summary(means.eLate)
+pairs(means.eLate, adjust = "bon")
+
+eAllp <- ggplot(edge_int, aes(x=IC, y=edge_weight, color=early_late, fill=early_late)) + 
+  geom_violin()+ theme_classic()
+eAllp
 ```
 
 
