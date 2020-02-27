@@ -50,11 +50,22 @@ glm<-read.table("~/Google Drive/HCP_graph/1200/5000perms/glm.txt", sep="\t", hea
 names(glm)<-c("Subject", "group","BMI_C","AOM_C","int","race","age")
 subs<-read.table("~/Google Drive/HCP_graph/1200/datasets/subjectIDs.txt", header=F, sep=" ")
 names(subs)<-"Subject"
+
 netmat<-read.table("~/Google Drive/HCP_graph/1200/datasets/3T_HCP1200_MSMAll_d15_ts2_nets/netmats1.txt", header=F, sep=" ")
+dim(netmat_m)
+
+node_df<-read.table("~/Google Drive/HCP_graph/1200/datasets/early_late_nodes.csv", header=TRUE, sep=",")
+edge_df<-read.table("~/Google Drive/HCP_graph/1200/datasets/early_late_edges.csv", header = TRUE, sep=",")
+head(node_df)
+node_df$module<-as.factor(node_df$module)
+
+names(node_df)
 
 summary(glm$group)
 
 NM<-cbind(subs,netmat)
+
+NMm<-cbind(subs,netmat)
 
 d0<-join(unres, res)
 
@@ -67,12 +78,32 @@ d3<-join(d2,NM)
 d4<-subset(d3, d3$group == 1)
 summary(is.na(d4$V36))
 d4<-d4[!is.na(d4$V36),]
-#head(netmat)
 dim(d4)
-d4$BMI_C
 
+# For response to reviewers
+netmat_m<-read.table("~/Google Drive/HCP_graph/1200/5000perms/R2R/hmotion_corr/netmats1.csv", header=T, sep=",")
+names(netmat_m)<-names(NM)
+motion<-read.table("~/Google Drive/HCP_graph/1200/datasets/HCP1200-Motion-Summaries.csv", header=T, sep=",")
+head(motion)
+motion$mean_motion = with(motion, ave(x = motionc, Subject, FUN = mean))
+motion<-motion[!duplicated(motion$Subject), ]
+head(motion)
+motion<-motion[!duplicated(motion$Subject), ]
+
+summary(netmat_m[,2:20])
+netmat_m[2:226]<-as.numeric(netmat_m[2:226])
+
+means = with(netmat_m, ave(x = netmat_m[,2:226], Subject, FUN = mean))
+head(means)
+summary(netmat_m[,2:20])
+
+
+d4m<-join(d4,motion)
 ```
 The missing check is OK. Lines up with imaging data.
+```{r}
+2040/510
+```
 
 
 ```{r}
