@@ -52,53 +52,90 @@ subs<-read.table("~/Google Drive/HCP_graph/1200/datasets/subjectIDs.txt", header
 names(subs)<-"Subject"
 
 netmat<-read.table("~/Google Drive/HCP_graph/1200/datasets/3T_HCP1200_MSMAll_d15_ts2_nets/netmats1.txt", header=F, sep=" ")
-dim(netmat_m)
 
-node_df<-read.table("~/Google Drive/HCP_graph/1200/datasets/early_late_nodes.csv", header=TRUE, sep=",")
-edge_df<-read.table("~/Google Drive/HCP_graph/1200/datasets/early_late_edges.csv", header = TRUE, sep=",")
-head(node_df)
-node_df$module<-as.factor(node_df$module)
+NM<-read.table("~/Google Drive/HCP_graph/1200/5000perms/check/check5000perms/netmats1.txt", header=F, sep="\t")
+names(NM)
+colnames(NM)[1]<-"Subject"
+names(NM)
+library(dplyr)
+ALL<-NM %>% 
+    group_by(Subject) %>%
+    summarise_all("mean")
 
-names(node_df)
+summary(ALL$V38)
+ALL$Subject<-as.factor(ALL$Subject)
 
-summary(glm$group)
-
-NM<-cbind(subs,netmat)
-
-NMm<-cbind(subs,netmat)
+NM0<-cbind(subs,netmat)
+summary(NM0$V35)
+names(NM0)
+#NMm<-cbind(subs,netmat)
 
 d0<-join(unres, res)
 
 d1<-join(d0,glm)
 
 d2<-d1[,colnames(d1)%in%interest$V1] 
+head(d2)
+summary(d2)
+d2$Subject<-as.factor(d2$Subject)
+d3<-join(d2,ALL)
+summary(d3)
 
-d3<-join(d2,NM)
+d30<-join(d2,NM0)
 
-d4<-subset(d3, d3$group == 1)
-summary(is.na(d4$V36))
-d4<-d4[!is.na(d4$V36),]
+d40<-subset(d30, d30$BMI_C != 'NA')
+summary(d4)
+summary(is.na(d40$V36))
+d40<-d40[!is.na(d40$V36),]
 dim(d4)
 
+d40<-subset(d30, d30$BMI_C != 'NA')
+summary(d40)
+summary(is.na(d40$V36))
+d40<-d40[!is.na(d40$V36),]
+dim(d40)
+
+
+
 # For response to reviewers
-netmat_m<-read.table("~/Google Drive/HCP_graph/1200/5000perms/R2R/hmotion_corr/netmats1.csv", header=T, sep=",")
-names(netmat_m)<-names(NM)
+
 motion<-read.table("~/Google Drive/HCP_graph/1200/datasets/HCP1200-Motion-Summaries.csv", header=T, sep=",")
 head(motion)
-motion$mean_motion = with(motion, ave(x = motionc, Subject, FUN = mean))
-motion<-motion[!duplicated(motion$Subject), ]
+motion$mean_motion = with(motion, ave(x = motion, Subject, FUN = mean))
 head(motion)
 motion<-motion[!duplicated(motion$Subject), ]
 
-summary(netmat_m[,2:20])
-netmat_m[2:226]<-as.numeric(netmat_m[2:226])
-
-means = with(netmat_m, ave(x = netmat_m[,2:226], Subject, FUN = mean))
-head(means)
-summary(netmat_m[,2:20])
 
 
-d4m<-join(d4,motion)
+netmat_m<-read.table("~/Google Drive/HCP_graph/1200/5000perms/R2R/hmotion_corr/netmats1.csv", header=F, sep=",")
+summary(netmat_m)
+names(netmat_m)
+colnames(netmat_m)[1]<-"Subject"
+names(netmat_m)
+library(dplyr)
+ALLm<-netmat_m %>% 
+    group_by(Subject) %>%
+    summarise_all("mean")
+
+summary(ALLm$V35)
+ALLm$Subject<-as.factor(ALLm$Subject)
+
+d3m<-join(d2,ALLm)
+summary(d3m)
+
+d4m<-subset(d3m, d3m$BMI_C != 'NA')
+summary(d4m)
+summary(is.na(d4m$V36))
+d4m<-d4m[!is.na(d4m$V36),]
+dim(d4m)
+d4m<-join(d4m,motion)
+dim(d4m)
+
+node_df<-read.table("~/Google Drive/HCP_graph/1200/datasets/early_late_nodes.csv", header=TRUE, sep=",")
+edge_df<-read.table("~/Google Drive/HCP_graph/1200/datasets/early_late_edges.csv", header = TRUE, sep=",")
+head(node_df)
+node_df$module<-as.factor(node_df$module)
+names(node_df)
 ```
 The missing check is OK. Lines up with imaging data.
 ```{r}
@@ -246,37 +283,37 @@ img_p[img_p > 0.05] <- NA
 ```
 
 # Significant positive BMI
-5->7 == V67
-5->10 == V70
-9->11 == V131
-10->13 == V148
-14->12 == V207
+5->7 == V68
+5->10 == V71
+9->11 == V132
+10->13 == V149
+14->12 == V208
 ```{r significant pos BMI}
 matrix( as.matrix(img_p[1,1:225]),nrow=15, ncol=15)
 ```
 ```{r plotting positive BMI}
-p1<-ggplot(d4, aes(BMI, V67)) +
+p1<-ggplot(d4, aes(BMI, V68)) +
   geom_point(shape=1) + 
   geom_smooth(method=lm)+scale_y_continuous(name="5 and 7")+
   scale_x_continuous(name="BMI")+
   theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
   theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
 
-p2<-ggplot(d4, aes(BMI, V70)) +
+p2<-ggplot(d4, aes(BMI, V71)) +
   geom_point(shape=1) + 
   geom_smooth(method=lm)+scale_y_continuous(name="5 and 10")+
   scale_x_continuous(name="BMI")+
   theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
   theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
 
-p3<-ggplot(d4, aes(BMI, V131)) +
+p3<-ggplot(d4, aes(BMI, V132)) +
   geom_point(shape=1) + 
   geom_smooth(method=lm)+scale_y_continuous(name="9 and 11")+
   scale_x_continuous(name="BMI")+
   theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
   theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
 
-p4<-ggplot(d4, aes(BMI, V148)) +
+p4<-ggplot(d4, aes(BMI, V149)) +
   geom_point(shape=1) + 
   geom_smooth(method=lm)+scale_y_continuous(name="10 and 13")+
   scale_x_continuous(name="BMI")+
@@ -289,39 +326,39 @@ ggarrange(p1,p2,p3,p4 + rremove("x.text"),
 ```
 
 # Significant negative BMI
-1->6 == V6
-3->4 == V34
-4->8 == V53
-4->15 == V60
-10->12 == V147
-10->15 == V150
+1->6 == V7
+3->4 == V35
+4->8 == V54
+4->15 == V61
+10->12 == V148
+10->15 == V151
 ```{r significant negative BMI}
 matrix( as.matrix(img_p[2,1:225]),nrow=15, ncol=15)
 ```
 
 ```{r plotting negative}
-p1<-ggplot(d4, aes(BMI, V6)) +
+p1<-ggplot(d4, aes(BMI, V7)) +
   geom_point(shape=1) + 
   geom_smooth(method=lm)+scale_y_continuous(name="1 and 6")+
   scale_x_continuous(name="BMI")+
   theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
   theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
 
-p2<-ggplot(d4, aes(BMI, V34)) +
+p2<-ggplot(d4, aes(BMI, V35)) +
   geom_point(shape=1) + 
   geom_smooth(method=lm)+scale_y_continuous(name="3 and 4")+
   scale_x_continuous(name="BMI")+
   theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
   theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
 
-p3<-ggplot(d4, aes(BMI, V53)) +
+p3<-ggplot(d4, aes(BMI, V54)) +
   geom_point(shape=1) + 
   geom_smooth(method=lm)+scale_y_continuous(name="4 and 8")+
   scale_x_continuous(name="BMI")+
   theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
   theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
 
-p4<-ggplot(d4, aes(BMI, V60)) +
+p4<-ggplot(d4, aes(BMI, V61)) +
   geom_point(shape=1) + 
   geom_smooth(method=lm)+scale_y_continuous(name="4 and 15")+
   scale_x_continuous(name="BMI")+
@@ -334,14 +371,14 @@ ggarrange(p1,p2,p3,p4 + rremove("x.text"),
 ```
 
 # Significant positive AoM
-12->15 == V180
+12->15 == V181
 
 ```{r significant positive}
 matrix( as.matrix(img_p[3,1:225]),nrow=15, ncol=15)
 ```
 
 ```{r plotting significant positive AoM}
-p1<-ggplot(d4, aes(Menstrual_AgeBegan, V180)) +
+p1<-ggplot(d4, aes(Menstrual_AgeBegan, V181)) +
   geom_point(shape=1) + 
   geom_smooth(method=lm)+scale_y_continuous(name="12 and 15")+
   scale_x_continuous(name="AoM")+
@@ -397,7 +434,7 @@ matrix( as.matrix(img_p[5,1:225]),nrow=15, ncol=15)
 
 ```{r, plotting the interaction between BMI and AoM on connectivity}
 n=50
-p1<-ggplot(subset(d4, !is.na(d4$AoM)), aes(BMI, V36, group=AoM, color=AoM)) +
+p1<-ggplot(subset(d4, !is.na(d4$AoM)), aes(BMI, V37, group=AoM, color=AoM)) +
   geom_point(aes(shape=AoM), size=2) + 
   geom_smooth(method=lm, aes(linetype=AoM))+
   scale_y_continuous(name="Correlation between\n IC3 and IC6")+
@@ -420,7 +457,7 @@ p1<-ggplot(subset(d4, !is.na(d4$AoM)), aes(BMI, V36, group=AoM, color=AoM)) +
   theme(legend.text = element_text(size=20))+ 
   theme(legend.title = element_text(size=20, face="bold"))
 
-p2<-ggplot(subset(d4, !is.na(d4$AoM)), aes(BMI, V178, group=AoM, color=AoM)) +
+p2<-ggplot(subset(d4, !is.na(d4$AoM)), aes(BMI, V179, group=AoM, color=AoM)) +
   geom_point(aes(shape=AoM), size=2) + 
   geom_smooth(method=lm, aes(linetype=AoM))+
   scale_y_continuous(name="Correlation between\n IC12 and IC13")+
@@ -465,7 +502,7 @@ interaction_plot
 matrix( as.matrix(img_p[6,1:225]),nrow=15, ncol=15)
 ```
 ```{r plotting the negative AoMxBMI interaction}
-p3<-ggplot(subset(d4, !is.na(d4$AoM)), aes(BMI, V18, group=AoM, color=AoM)) +
+p3<-ggplot(subset(d4, !is.na(d4$AoM)), aes(BMI, V19, group=AoM, color=AoM)) +
   geom_point(aes(shape=AoM), size=2) + 
   geom_smooth(method=lm, aes(linetype=AoM))+
   scale_y_continuous(name="Correlation between\n IC2 and IC3")+
@@ -554,10 +591,10 @@ summary(mylogit)
 ```
 
 ## Nodes of interest 
-sig 3->6 == V36
-check 6 -> 3 == V78
+sig 3->6 == V37
+check 6 -> 3 == V79
 12->13 == V192
-check 13->12 == V178
+check 13->12 == V179
 
 ## Control variables
 Race
@@ -684,17 +721,30 @@ Self-reported zygosity. Until the S1200 release this was the \Zygosity\" measure
 Twin zygosity verified by genotyping. Requires both subjects in a twin pair to have HasGT=TRUE to have a value (if genotyping is not available for either of a twin pair, no values are given for ZygosityGT).  Non-twin subjects also do not have a value for ZygosityGT.  Note that some subjects self-reported as dizygotic twins (ZygositySR='NotMZ') but genotyping established that they were monozygotic twins (thence ZygosityGT='MZ' for those subjects).  ZygosityGT should be given precedence over ZygositySR.
 
 ## Nodes of interest 
-sig 3->6 == V36
-check 6 -> 3 == V78
-12->13 == V192
-check 13->12 == V178
+sig 3->6 == V37
+check 6 -> 3 == V79
+12->13 == V193
+check 13->12 == V179
 ```{r}
 twins<-subset(d4 , d4$ZygosityGT %in% c('DZ', 'MZ'))
-myvars<-c("Family_ID","Subject","Menstrual_AgeBegan","BMI","ZygosityGT","Age_in_Yrs","Race","Gender","V36","V78","V178","V192")
+myvars<-c("Family_ID","Subject","Menstrual_AgeBegan","BMI","ZygosityGT","Age_in_Yrs","Race","Gender","V37","V79","V179","V193")
 d5<-twins[myvars]
 d5$ZygosityGT<-factor(d5$ZygosityGT)
 d5$Race<-factor(d5$Race)
-d6 <- fast.reshape(d5, id="Family_ID",varying=c("BMI","Menstrual_AgeBegan","Subject","V36","V78","V178","V192"))
+d5<-na.omit(d5)
+
+twins0<-subset(d40 , d40$ZygosityGT %in% c('DZ', 'MZ'))
+myvars0<-c("Family_ID","Subject","Menstrual_AgeBegan","BMI","ZygosityGT","Age_in_Yrs","Race","Gender","V36","V78","V178","V192")
+d50<-twins0[myvars0]
+d50$ZygosityGT<-factor(d50$ZygosityGT)
+d50$Race<-factor(d50$Race)
+d50<-na.omit(d50)
+
+
+
+
+
+d6 <- fast.reshape(d5, id="Family_ID",varying=c("BMI","Menstrual_AgeBegan","Subject","V37","V79","V179","V193"))
 d6<-na.omit(d6)
 head(d6)
 ```
@@ -711,29 +761,30 @@ scatterdens <- function(x) {
 ```
 
 ```{r}
+names(d6)
 mz_bmi <- log(subset(d6, ZygosityGT ==  "MZ"  )[,c("BMI1","BMI2")])  
 p_bmi_mz<-scatterdens(mz_bmi)
 mz_aom<-subset(d6, ZygosityGT ==  "MZ"  )[,c("Menstrual_AgeBegan1","Menstrual_AgeBegan2")]
 p_aom_mz<-scatterdens(mz_aom)
 
-mz_V178<-subset(d6, ZygosityGT ==  "MZ"  )[,c("V1781","V1782")]
+mz_V178<-subset(d6, ZygosityGT ==  "MZ"  )[,c("V1791","V1792")]
 p_V178_mz<-scatterdens(mz_V178)
 
-mz_V36<-subset(d6, ZygosityGT ==  "MZ"  )[,c("V361","V362")]
+mz_V36<-subset(d6, ZygosityGT ==  "MZ"  )[,c("V371","V372")]
 p_V36_mz<-scatterdens(mz_V36)
-
-
+p_V36_mz
 
 dz_bmi <- log(subset(d6, ZygosityGT ==  "DZ"  )[,c(  "BMI1"  ,  "BMI2"  )]) 
 p_bmi_dz<-scatterdens(dz_bmi)
 dz_aom<-subset(d6, ZygosityGT ==  "DZ"  )[,c("Menstrual_AgeBegan1","Menstrual_AgeBegan2")]
 p_aom_dz<-scatterdens(dz_aom)
 
-dz_V178<-subset(d6, ZygosityGT ==  "DZ"  )[,c("V1781","V1782")]
+dz_V178<-subset(d6, ZygosityGT ==  "DZ"  )[,c("V1791","V1792")]
 p_V178_dz<-scatterdens(dz_V178)
 
-dz_V36<-subset(d6, ZygosityGT ==  "DZ"  )[,c("V361","V362")]
+dz_V36<-subset(d6, ZygosityGT ==  "DZ"  )[,c("V371","V372")]
 p_V36_dz<-scatterdens(dz_V36)
+p_V36_dz
 
 pBMI<-ggarrange(p_bmi_mz,p_bmi_dz + rremove("x.text"), 
           labels = c("A", "B"),
@@ -849,9 +900,10 @@ aom_acde %>%
 
 
 ```{r}
-l2.0<-lm(V178 ~ 1+BMI*Menstrual_AgeBegan+Age_in_Yrs+Race, data=d4)
+l2.0<-lm(V179 ~ 1+BMI*Menstrual_AgeBegan+Age_in_Yrs+Race, data=d4)
+
 summary(l2.0)
-l2 <- twinlm(V178 ~ 1+BMI*Menstrual_AgeBegan+Age_in_Yrs+Race, data=d5,
+l2 <- twinlm(V179 ~ 1+BMI*Menstrual_AgeBegan+Age_in_Yrs+Race, data=d5,
 DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)  
 summary(l2)
 # AIC
@@ -897,15 +949,15 @@ V178_acde %>%
 
 
 ```{r}
-l3.0<-lm(V36 ~ BMI*Menstrual_AgeBegan+Age_in_Yrs+Race, data=d4)
+l3.0<-lm(V37 ~ BMI*Menstrual_AgeBegan+Age_in_Yrs+Race, data=d4)
 summary(l3.0)
-l3 <- twinlm(V36 ~ 1+BMI*Menstrual_AgeBegan+Age_in_Yrs+Race, data=d5,
+l3 <- twinlm(V36 ~ 1+BMI*Menstrual_AgeBegan+Age_in_Yrs+Race, data=d50,
 DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)  
 summary(l3)
 # AIC
 AIC(l3.0)
 AICc(l3,l3.0)
-
+summary(d5$V37)
 2676.394-1186.078
 ```
 l3.0 2675.864
