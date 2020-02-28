@@ -34,8 +34,8 @@ library(MuMIn)
 library(phia)
 library(nlme)
 #devtools::install_github("malcolmbarrett/ggdag")
-#devtools::install_github("kkholst/lava")  
-#devtools::install_github("kkholst/mets")  
+#devtools::install_github("kkholst/lava")
+#devtools::install_github("kkholst/mets")
 cbPalette <- c("#CC79A7", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00")
 bwPalette<-c("#000000", "#999999", "CCCCCC","666666","333333")
 ```
@@ -74,7 +74,7 @@ d0<-join(unres, res)
 
 d1<-join(d0,glm)
 
-d2<-d1[,colnames(d1)%in%interest$V1] 
+d2<-d1[,colnames(d1)%in%interest$V1]
 head(d2)
 summary(d2)
 d2$Subject<-as.factor(d2$Subject)
@@ -100,7 +100,7 @@ colnames(subs4)[1]<-"Subject"
 Subject<-subs4$Subject
 NMnew<-cbind(Subject,NM)
 
-NMnew<-NMnew %>% 
+NMnew<-NMnew %>%
     group_by(Subject) %>%
     summarise_all("mean")
 
@@ -124,7 +124,7 @@ colnames(subs4)[1]<-"Subject"
 Subject<-subs4$Subject
 NMm<-cbind(Subject,NMm)
 names(NMm)
-NMm<-NMm %>% 
+NMm<-NMm %>%
     group_by(Subject) %>%
     summarise_all("mean")
 
@@ -184,7 +184,7 @@ Nice function to make a pretty table
 ```{r}
 tablr<-function(Y,x,D){
   Q<-favstats(Y ~ x, data = D)
-  Q.stat <- Q[, c("x", "n", "mean", "sd")] 
+  Q.stat <- Q[, c("x", "n", "mean", "sd")]
   colnames(Q.stat)<-c("test","n", "mean", "sd")
   a<-match.call()[2]
   return(Q.stat)
@@ -236,7 +236,7 @@ kable(all, format = "html",  col.names = c("n","mean","SD",
 Earlier onset of puberty significantly related to heavier adult BMI.
 ```{r interaction graph}
 int_graph<-ggplot(d4, aes(Menstrual_AgeBegan, BMI)) +
-  geom_point(shape=1) + 
+  geom_point(shape=1) +
   geom_smooth(method=lm,colour='black')+theme_classic()+scale_y_continuous(name="Body Mass Index (BMI)")+
   scale_x_continuous(name="Age of onset of menstration (years)")+
   theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
@@ -268,7 +268,7 @@ x
 ```
 
 ```{r table 2}
-kable(x, format = "html",  
+kable(x, format = "html",
       caption = "Table 2: Relationship between BMI and Age of onset of menses",
       digits = c(2,2,2,2), align = "cccc", col.names = c("Estimate", "Standard Error","T value","P value")) %>%
   kable_styling()
@@ -307,34 +307,34 @@ matrix( as.matrix(img_p[1,1:225]),nrow=15, ncol=15)
 ```
 ```{r plotting positive BMI}
 p1<-ggplot(d4, aes(BMI, V67)) +
-  geom_point(shape=1) + 
+  geom_point(shape=1) +
   geom_smooth(method=lm)+scale_y_continuous(name="5 and 7")+
   scale_x_continuous(name="BMI")+
   theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
   theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
 
 p2<-ggplot(d4, aes(BMI, V70)) +
-  geom_point(shape=1) + 
+  geom_point(shape=1) +
   geom_smooth(method=lm)+scale_y_continuous(name="5 and 10")+
   scale_x_continuous(name="BMI")+
   theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
   theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
 
 p3<-ggplot(d4, aes(BMI, V131)) +
-  geom_point(shape=1) + 
+  geom_point(shape=1) +
   geom_smooth(method=lm)+scale_y_continuous(name="9 and 11")+
   scale_x_continuous(name="BMI")+
   theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
   theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
 
 p4<-ggplot(d4, aes(BMI, V148)) +
-  geom_point(shape=1) + 
+  geom_point(shape=1) +
   geom_smooth(method=lm)+scale_y_continuous(name="10 and 13")+
   scale_x_continuous(name="BMI")+
   theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
   theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
 
-ggarrange(p1,p2,p3,p4 + rremove("x.text"), 
+ggarrange(p1,p2,p3,p4 + rremove("x.text"),
           labels = c("A", "B", "C","D"),
           ncol = 2, nrow = 2)
 ```
@@ -352,34 +352,34 @@ matrix( as.matrix(img_p[2,1:225]),nrow=15, ncol=15)
 
 ```{r plotting negative}
 p1<-ggplot(d4, aes(BMI, V6)) +
-  geom_point(shape=1) + 
+  geom_point(shape=1) +
   geom_smooth(method=lm)+scale_y_continuous(name="1 and 6")+
   scale_x_continuous(name="BMI")+
   theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
   theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
 
 p2<-ggplot(d4, aes(BMI, V34)) +
-  geom_point(shape=1) + 
+  geom_point(shape=1) +
   geom_smooth(method=lm)+scale_y_continuous(name="3 and 4")+
   scale_x_continuous(name="BMI")+
   theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
   theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
 
 p3<-ggplot(d4, aes(BMI, V53)) +
-  geom_point(shape=1) + 
+  geom_point(shape=1) +
   geom_smooth(method=lm)+scale_y_continuous(name="4 and 8")+
   scale_x_continuous(name="BMI")+
   theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
   theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
 
 p4<-ggplot(d4, aes(BMI, V60)) +
-  geom_point(shape=1) + 
+  geom_point(shape=1) +
   geom_smooth(method=lm)+scale_y_continuous(name="4 and 15")+
   scale_x_continuous(name="BMI")+
   theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
   theme(axis.title.y = element_text( size=20),axis.text.y  = element_text(size=20))
 
-ggarrange(p1,p2,p3,p4 + rremove("x.text"), 
+ggarrange(p1,p2,p3,p4 + rremove("x.text"),
           labels = c("A", "B", "C","D"),
           ncol = 2, nrow = 2)
 ```
@@ -393,7 +393,7 @@ matrix( as.matrix(img_p[3,1:225]),nrow=15, ncol=15)
 
 ```{r plotting significant positive AoM}
 p1<-ggplot(d4, aes(Menstrual_AgeBegan, V180)) +
-  geom_point(shape=1) + 
+  geom_point(shape=1) +
   geom_smooth(method=lm)+scale_y_continuous(name="12 and 15")+
   scale_x_continuous(name="AoM")+
   theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
@@ -424,7 +424,7 @@ summary(as.factor(d4$AoM))
 write.table(d4,"~/Google Drive/HCP_graph/1200/datasets/post_hoc.csv", sep=",", row.names = FALSE)
 ```
 # Significant positive AoMxBMI
-## 12 (visual cortex)->13 (somatosensory - mouth) == V178  
+## 12 (visual cortex)->13 (somatosensory - mouth) == V178
 ### IC 12
 ![IC12](https://github.com/grace-shearrer/HCP_puberty/blob/master/viz/IC12_gordon.png?raw=true)
 ![IC12_sub](https://github.com/grace-shearrer/HCP_puberty/blob/master/viz/IC12_gordon_sub.png?raw=true)
@@ -449,11 +449,11 @@ matrix( as.matrix(img_p[5,1:225]),nrow=15, ncol=15)
 ```{r, plotting the interaction between BMI and AoM on connectivity}
 n=50
 p1<-ggplot(subset(d4, !is.na(d4$AoM)), aes(BMI, V36, group=AoM, color=AoM)) +
-  geom_point(aes(shape=AoM), size=2) + 
+  geom_point(aes(shape=AoM), size=2) +
   geom_smooth(method=lm, aes(linetype=AoM))+
   scale_y_continuous(name="Correlation between\n IC3 and IC6")+
   scale_x_continuous(name="BMI")+
-  theme_classic()+ 
+  theme_classic()+
   scale_shape_manual(values = c(1, 2),
     breaks = c("early","late"),
     labels = c("Early onsent (<12y)", "Late onsent (>13y)"),
@@ -467,16 +467,16 @@ p1<-ggplot(subset(d4, !is.na(d4$AoM)), aes(BMI, V36, group=AoM, color=AoM)) +
                         labels = c("Early onsent (<12y)", "Late onsent (>13y)"),
                         guide = guide_legend(title.position = "top", title = "Age at onset of menses", size=20))+
   theme(axis.title.x = element_text(size=20), axis.text.x  = element_text(size=20))+
-  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+ 
-  theme(legend.text = element_text(size=20))+ 
+  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+
+  theme(legend.text = element_text(size=20))+
   theme(legend.title = element_text(size=20, face="bold"))
 
 p2<-ggplot(subset(d4, !is.na(d4$AoM)), aes(BMI, V178, group=AoM, color=AoM)) +
-  geom_point(aes(shape=AoM), size=2) + 
+  geom_point(aes(shape=AoM), size=2) +
   geom_smooth(method=lm, aes(linetype=AoM))+
   scale_y_continuous(name="Correlation between\n IC12 and IC13")+
   scale_x_continuous(name="BMI")+
-  theme_classic()+ 
+  theme_classic()+
   scale_shape_manual(values = c(1, 2),
     breaks = c("early","late"),
     labels = c("Early onsent (<12y)", "Late onsent (>13y)"),
@@ -490,10 +490,10 @@ p2<-ggplot(subset(d4, !is.na(d4$AoM)), aes(BMI, V178, group=AoM, color=AoM)) +
                         labels = c("Early onsent (<12y)", "Late onsent (>13y)"),
                         guide = guide_legend(title.position = "top", title = "Age at onset of menses", size=20))+
   theme(axis.title.x = element_text(size=20), axis.text.x  = element_text(size=20))+
-  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+ 
-  theme(legend.text = element_text(size=20))+ 
+  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+
+  theme(legend.text = element_text(size=20))+
   theme(legend.title = element_text(size=20, face="bold"))
-  
+
 
 interaction_plot<- ggarrange(p1,p2 ,
                              labels = c("A", "B"),
@@ -517,11 +517,11 @@ matrix( as.matrix(img_p[6,1:225]),nrow=15, ncol=15)
 ```
 ```{r plotting the negative AoMxBMI interaction}
 p3<-ggplot(subset(d4, !is.na(d4$AoM)), aes(BMI, V18, group=AoM, color=AoM)) +
-  geom_point(aes(shape=AoM), size=2) + 
+  geom_point(aes(shape=AoM), size=2) +
   geom_smooth(method=lm, aes(linetype=AoM))+
   scale_y_continuous(name="Correlation between\n IC2 and IC3")+
   scale_x_continuous(name="BMI")+
-  theme_classic()+ 
+  theme_classic()+
   scale_shape_manual(values = c(1, 2),
     breaks = c("early","late"),
     labels = c("Early onsent (<12y)", "Late onsent (>13y)"),
@@ -535,8 +535,8 @@ p3<-ggplot(subset(d4, !is.na(d4$AoM)), aes(BMI, V18, group=AoM, color=AoM)) +
                         labels = c("Early onsent (<12y)", "Late onsent (>13y)"),
                         guide = guide_legend(title.position = "top", title = "Age at onset of menses", size=20))+
   theme(axis.title.x = element_text(size=20), axis.text.x  = element_text(size=20))+
-  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+ 
-  theme(legend.text = element_text(size=20))+ 
+  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+
+  theme(legend.text = element_text(size=20))+
   theme(legend.title = element_text(size=20, face="bold"))
 
 p3
@@ -550,7 +550,7 @@ summary(as.factor(d4$Menstrual_UsingBirthControl))
 onBC<-subset(d4, d4$Menstrual_UsingBirthControl == "1")
 summary(as.factor(onBC$Menstrual_UsingBirthControl))
 summary(as.factor(onBC$Menstrual_BirthControlCode))
-# 1=OC's for contraception, 2=OC's primarily for menstrual regulation, 3=estradiol for menstrual regulation, 4=progesterone for menstrual regulation, 5=fertility therapy, 6=other, 7=unknown  (Asked of female participants only) 
+# 1=OC's for contraception, 2=OC's primarily for menstrual regulation, 3=estradiol for menstrual regulation, 4=progesterone for menstrual regulation, 5=fertility therapy, 6=other, 7=unknown  (Asked of female participants only)
 ```
 ## Checking SES
 ```{r creating SES categories}
@@ -591,7 +591,7 @@ If married: THI <30K
 
 ```{r plotting effect of SES}
 ggplot(subset(d4, d4$SES_comp != is.na(d4$SES_comp)), aes(Menstrual_AgeBegan, BMI, group=SES_comp, color=SES_comp)) +
-  geom_point(shape=1) + 
+  geom_point(shape=1) +
   geom_smooth(method=lm)+theme_classic()+scale_y_continuous(name="Body Mass Index (BMI)")+
   scale_x_continuous(name="Age of onset of menstration")+
   theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
@@ -604,7 +604,7 @@ mylogit <- glm(SES_comp ~ Menstrual_AgeBegan*BMI, data = subset(d4, d4$SES_comp 
 summary(mylogit)
 ```
 
-## Nodes of interest 
+## Nodes of interest
 sig 3->6 == V37
 check 6 -> 3 == V79
 12->13 == V192
@@ -620,7 +620,7 @@ p.adjust(coef(summary(ctrl1))[, 4], method="BH")
 ctrl2<-lm(Menstrual_AgeBegan~Race+Ethnicity+Age_in_Yrs, data=d4)
 p.adjust(coef(summary(ctrl2))[, 4], method="BH")
 
-twoM <- rbind(tidy(ctrl1) %>% mutate(model = "Relationshio to BMI"), 
+twoM <- rbind(tidy(ctrl1) %>% mutate(model = "Relationshio to BMI"),
                 tidy(ctrl2) %>% mutate(model = "Relationship to age at onset of menses")
                 )
 
@@ -630,7 +630,7 @@ SI1
 
 Looks like I can drop ethnicity since it is not related to either BMI nor Puberty.
 
-# False Discovery Correction 
+# False Discovery Correction
 Bonferroni
 Cor #: 11
 ```{r bonferroni correction}
@@ -684,7 +684,7 @@ summary(mCCom1)
 
 
 # NIH Toolbox Cognition Crystallized Composite: Age Adjusted Scale Score
-## About 
+## About
 The Crystallized Cognition Composite score is derived by averaging the normalized scores of each of the Toolbox tests that are crystallized measures (Picture Vocabulary and Reading Tests), then deriving scale scores based on this new distribution. One can interpret the Crystallized Cognition Composite as a more global assessment of individual and group verbal reasoning. Higher scores indicate higher levels of functioning. Age-adjusted Scale Score: Participant score is normed using the age appropriate band of Toolbox Norming Sample (bands of ages 18-29, or 30-35), where a score of 100 indicates performance that was at the national average and a score of 115 or 85, indicates performance 1 SD above or below the national average for participants age band.
 ```{r}
 mCCr1<-lm(CogCrystalComp_AgeAdj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
@@ -694,7 +694,7 @@ p.adjust(coef(summary(mCCr1))[, 4], method="BH", ad)
 ```
 ```{r plot of the crystalized cognition}
 ggplot(subset(d4, !is.na(AoM)), aes(BMI, CogCrystalComp_AgeAdj, color=AoM, group=AoM)) +
-  geom_point(shape=1) + 
+  geom_point(shape=1) +
   geom_smooth(method=lm)+scale_y_continuous(name="crystal cognition")+
   scale_x_continuous(name="BMI")+
   theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
@@ -731,10 +731,10 @@ summary(mTaste1)
 ```
 
 ## Heritability
-Self-reported zygosity. Until the S1200 release this was the \Zygosity\" measure. The small number of subjects who do not have a value for this measure (blank) self reported as twins but did not self report their twin zygosity."  
+Self-reported zygosity. Until the S1200 release this was the \Zygosity\" measure. The small number of subjects who do not have a value for this measure (blank) self reported as twins but did not self report their twin zygosity."
 Twin zygosity verified by genotyping. Requires both subjects in a twin pair to have HasGT=TRUE to have a value (if genotyping is not available for either of a twin pair, no values are given for ZygosityGT).  Non-twin subjects also do not have a value for ZygosityGT.  Note that some subjects self-reported as dizygotic twins (ZygositySR='NotMZ') but genotyping established that they were monozygotic twins (thence ZygosityGT='MZ' for those subjects).  ZygosityGT should be given precedence over ZygositySR.
 
-## Nodes of interest 
+## Nodes of interest
 sig 3->6 == V36
 check 6 -> 3 == V78
 12->13 == V192
@@ -764,19 +764,19 @@ head(d6)
 ```
 
 ```{r}
-library("cowplot")  
+library("cowplot")
 scatterdens <- function(x) {
   sp <- ggplot(x,aes_string(colnames(x)[1], colnames(x)[2])) + theme_minimal() + geom_point(alpha=0.3) + geom_density_2d()
-  xdens <- ggplot(x, aes_string(colnames(x)[1],fill=1)) + theme_minimal() +  geom_density(alpha=.5)+ theme(axis.text.x = element_blank(), legend.position =  "none"  ) + labs(x=NULL) 
-  ydens <- ggplot(x, aes_string(colnames(x)[2],fill=1)) +  theme_minimal() +  geom_density(alpha=.5) +    theme(axis.text.y = element_blank(),  axis.text.x = element_text(angle=90, vjust=0), legend.position =  "none"  ) +  labs(x=NULL) + coord_flip()   
-  g <- plot_grid(xdens,NULL,sp,ydens, ncol=2,nrow=2,                                                                         rel_widths=c(4,1.4),rel_heights=c(1.4,4))   
-  return(g)  
+  xdens <- ggplot(x, aes_string(colnames(x)[1],fill=1)) + theme_minimal() +  geom_density(alpha=.5)+ theme(axis.text.x = element_blank(), legend.position =  "none"  ) + labs(x=NULL)
+  ydens <- ggplot(x, aes_string(colnames(x)[2],fill=1)) +  theme_minimal() +  geom_density(alpha=.5) +    theme(axis.text.y = element_blank(),  axis.text.x = element_text(angle=90, vjust=0), legend.position =  "none"  ) +  labs(x=NULL) + coord_flip()
+  g <- plot_grid(xdens,NULL,sp,ydens, ncol=2,nrow=2,                                                                         rel_widths=c(4,1.4),rel_heights=c(1.4,4))
+  return(g)
 }
 ```
 
 ```{r}
 names(d6)
-mz_bmi <- log(subset(d6, ZygosityGT ==  "MZ"  )[,c("BMI1","BMI2")])  
+mz_bmi <- log(subset(d6, ZygosityGT ==  "MZ"  )[,c("BMI1","BMI2")])
 p_bmi_mz<-scatterdens(mz_bmi)
 mz_aom<-subset(d6, ZygosityGT ==  "MZ"  )[,c("Menstrual_AgeBegan1","Menstrual_AgeBegan2")]
 p_aom_mz<-scatterdens(mz_aom)
@@ -788,7 +788,7 @@ mz_V36<-subset(d6, ZygosityGT ==  "MZ"  )[,c("V361","V362")]
 p_V36_mz<-scatterdens(mz_V36)
 p_V36_mz
 
-dz_bmi <- log(subset(d6, ZygosityGT ==  "DZ"  )[,c(  "BMI1"  ,  "BMI2"  )]) 
+dz_bmi <- log(subset(d6, ZygosityGT ==  "DZ"  )[,c(  "BMI1"  ,  "BMI2"  )])
 p_bmi_dz<-scatterdens(dz_bmi)
 dz_aom<-subset(d6, ZygosityGT ==  "DZ"  )[,c("Menstrual_AgeBegan1","Menstrual_AgeBegan2")]
 p_aom_dz<-scatterdens(dz_aom)
@@ -800,38 +800,38 @@ dz_V36<-subset(d6, ZygosityGT ==  "DZ"  )[,c("V361","V362")]
 p_V36_dz<-scatterdens(dz_V36)
 p_V36_dz
 
-pBMI<-ggarrange(p_bmi_mz,p_bmi_dz + rremove("x.text"), 
+pBMI<-ggarrange(p_bmi_mz,p_bmi_dz + rremove("x.text"),
           labels = c("A", "B"),
           ncol = 2, nrow = 1)
 
-pAoM<-ggarrange(p_aom_mz,p_aom_dz + rremove("x.text"), 
+pAoM<-ggarrange(p_aom_mz,p_aom_dz + rremove("x.text"),
           labels = c("A", "B"),
           ncol = 2, nrow = 1)
 
-pV178<-ggarrange(p_V178_mz,p_V178_dz + rremove("x.text"), 
+pV178<-ggarrange(p_V178_mz,p_V178_dz + rremove("x.text"),
           labels = c("A", "B"),
           ncol = 2, nrow = 1)
 
-pV36<-ggarrange(p_V36_mz,p_V36_dz + rremove("x.text"), 
+pV36<-ggarrange(p_V36_mz,p_V36_dz + rremove("x.text"),
           labels = c("A", "B"),
           ncol = 2, nrow = 1)
 
 ```
 
 ```{r}
-cor.test(mz_bmi[,1],mz_bmi[,2], method=  "spearman"  )  
-cor.test(dz_bmi[,1],dz_bmi[,2], method=  "spearman"  )  
+cor.test(mz_bmi[,1],mz_bmi[,2], method=  "spearman"  )
+cor.test(dz_bmi[,1],dz_bmi[,2], method=  "spearman"  )
 
-cor.test(mz_aom[,1],mz_aom[,2], method=  "spearman"  )  
-cor.test(dz_aom[,1],dz_aom[,2], method=  "spearman"  )  
+cor.test(mz_aom[,1],mz_aom[,2], method=  "spearman"  )
+cor.test(dz_aom[,1],dz_aom[,2], method=  "spearman"  )
 ```
 
 ## About the results
-Heritability is formally defined as the proportion of phenotypic variation (VP) that is due to variation in genetic values (VG).  
-### Broad-sense heritability  
+Heritability is formally defined as the proportion of phenotypic variation (VP) that is due to variation in genetic values (VG).
+### Broad-sense heritability
 Defined as H2 = VG/VP, captures the *proportion of phenotypic variation due to genetic values that may include effects due to dominance and epistasis*.
- * dominance - possible allelic interactions within loci  
- * epistasis- between loci  
+ * dominance - possible allelic interactions within loci
+ * epistasis- between loci
 
 ### Narrow-sense heritability
 h2 = VA/VP, refers to the proportion of phenotypic variation that is due to additive genetic values (VA)
@@ -839,7 +839,7 @@ h2 = VA/VP, refers to the proportion of phenotypic variation that is due to addi
 *The phenotypic variance (VP)* in a population is influenced by genetic variance (VG) and environmental sources (VE)
 
 VP = VG + VE
-so then narrow sense is also defined as:  
+so then narrow sense is also defined as:
 
 *h2 = EA/(VG+VE)*
 
@@ -850,10 +850,10 @@ so then narrow sense is also:
 *h2 = VA/(VA+VD+VI+VE)*
 
 ### variance components
-* additive genetic (A)  
-* common shared family environment (C)  
-* non-shared environmental (E) 
-* genetic dominance effects (D) 
+* additive genetic (A)
+* common shared family environment (C)
+* non-shared environmental (E)
+* genetic dominance effects (D)
 ```{r}
 dd<-na.omit(dd)
 dd$ZygosityGT <- factor(dd$ZygosityGT)
@@ -861,7 +861,7 @@ dd$Race<- factor(dd$Race)
 summary(dd$Race)
 l0.0<-lm(BMI~Age_in_Yrs+Race+Menstrual_AgeBegan, data = d4)
 summary(l0.0)
-l0 <- twinlm(BMI ~ 1+Age_in_Yrs+Race+Menstrual_AgeBegan, data=dd,  DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)  
+l0 <- twinlm(BMI ~ 1+Age_in_Yrs+Race+Menstrual_AgeBegan, data=dd,  DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)
 summary(l0)
 
 
@@ -871,7 +871,7 @@ AICc(l0,l0.0)
 ```
 AIC
 l0.0  3157.73
-l0    1363.039 
+l0    1363.039
 
 AICc
      df     AICc
@@ -891,15 +891,15 @@ bmi_acde %>%
 ```{r}
 l1.0<-lm(Menstrual_AgeBegan ~ Age_in_Yrs+Race, data =d4)
 summary(l1.0)
-l1 <- twinlm(Menstrual_AgeBegan ~ 1+Age_in_Yrs+Race, data=dd,  DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)  
+l1 <- twinlm(Menstrual_AgeBegan ~ 1+Age_in_Yrs+Race, data=dd,  DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)
 summary(l1)
 
 # AIC
 AIC(l1.0)
 AICc(l1,l1.0)
 ```
-AIC 
-l1  818.5318 
+AIC
+l1  818.5318
 l1.0 1915.629
 
      df      AICc
@@ -920,7 +920,7 @@ l2.0<-lm(V178 ~ 1+BMI*Menstrual_AgeBegan+Age_in_Yrs+Race, data=d4)
 
 summary(l2.0)
 l2 <- twinlm(V178 ~ 1+BMI*Menstrual_AgeBegan+Age_in_Yrs+Race, data=d5,
-DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)  
+DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)
 summary(l2)
 # AIC
 AIC(l2.0)
@@ -930,8 +930,8 @@ summary(as.factor(l2$data$`RaceMore than one`))
 2972.483-1309.755
 ```
 ##### AIC
-AIC basic principles  
-So to summarize, the basic principles that guide the use of the AIC are:  
+AIC basic principles
+So to summarize, the basic principles that guide the use of the AIC are:
 
 * Lower indicates a more parsimonious model, relative to a model fit with a higher AIC.
 * It is a relative measure of model parsimony, so it only has meaning if we compare the AIC for alternate hypotheses (= different models of the data).
@@ -943,10 +943,10 @@ So to summarize, the basic principles that guide the use of the AIC are:
 * You should correct for small sample sizes if you use the AIC with small sample sizes, by using the AICc statistic.
 
 Example:
-whose AIC values are 100, 102, and 110. Then the second model is exp((100−102)/2) = 0.368 times as probable as the first model to minimize the information loss. Similarly, the third model is exp((100−110)/2) = 0.007 times as probable as the first model to minimize the information loss.  
+whose AIC values are 100, 102, and 110. Then the second model is exp((100−102)/2) = 0.368 times as probable as the first model to minimize the information loss. Similarly, the third model is exp((100−110)/2) = 0.007 times as probable as the first model to minimize the information loss.
 
-Plain AIC  
-BMI:Menstrual_AgeBegan                    0.05400 AIC: 2971.953 
+Plain AIC
+BMI:Menstrual_AgeBegan                    0.05400 AIC: 2971.953
 V178~BMI:Menstrual_AgeBegan               0.04817 AIC: 1306.67 <- lower so probably better
 
      df     AICc
@@ -969,7 +969,7 @@ l3.0<-lm(V36 ~ BMI*Menstrual_AgeBegan+Age_in_Yrs+Race, data=d4)
 summary(l3.0)
 
 l3 <- twinlm(V36 ~ 1+BMI*Menstrual_AgeBegan+Age_in_Yrs+Race, data=d5,
-DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)  
+DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)
 summary(as.factor(l3$data$`RaceMore than one`))
 summary(l3)
 # AIC
@@ -1009,14 +1009,14 @@ y3$fac<-row.names(y3)
 
 
 ```{r}
-pd <- position_dodge(0.1) 
+pd <- position_dodge(0.1)
 n0= 3
 
-plt0<-ggplot(y0, aes(x=fac, y=acde.Estimate, color=fac)) + 
-  ggtitle("BMI") + 
+plt0<-ggplot(y0, aes(x=fac, y=acde.Estimate, color=fac)) +
+  ggtitle("BMI") +
   geom_point(position=position_dodge(), stat="identity",size=n0) +
   geom_errorbar(aes(ymin=acde.2.5., ymax=acde.97.5.),
-                size=1,    
+                size=1,
                 width=.5,
                 position=position_dodge(.9))+
   geom_hline(aes(yintercept = 0),  color = "grey")+
@@ -1025,17 +1025,17 @@ plt0<-ggplot(y0, aes(x=fac, y=acde.Estimate, color=fac)) +
   scale_x_discrete(name="Genetic component")+
   scale_y_continuous(name="Estimate")+
   theme(axis.title.x = element_text(size=20), axis.text.x  = element_text(size=20))+
-  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+ 
-  theme(legend.text = element_text(size=20))+ 
+  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+
+  theme(legend.text = element_text(size=20))+
   theme(legend.title = element_text(size=20, face="bold"))+
   theme(legend.position="none")
-  
 
-plt1<-ggplot(y1, aes(x=fac, y=acde.Estimate, color=fac)) + 
-  ggtitle("Age at onset of menses") + 
+
+plt1<-ggplot(y1, aes(x=fac, y=acde.Estimate, color=fac)) +
+  ggtitle("Age at onset of menses") +
   geom_point(position=position_dodge(), stat="identity",size=n0) +
   geom_errorbar(aes(ymin=acde.2.5., ymax=acde.97.5.),
-                size=1,    
+                size=1,
                 width=.5,
                 position=position_dodge(.9))+
   geom_hline(aes(yintercept = 0),  color = "grey")+
@@ -1044,18 +1044,18 @@ plt1<-ggplot(y1, aes(x=fac, y=acde.Estimate, color=fac)) +
   scale_x_discrete(name="Genetic component")+
   scale_y_continuous(name="Estimate")+
   theme(axis.title.x = element_text(size=20), axis.text.x  = element_text(size=20))+
-  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+ 
-  theme(legend.text = element_text(size=20))+ 
+  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+
+  theme(legend.text = element_text(size=20))+
   theme(legend.title = element_text(size=20, face="bold"))+
   theme(legend.position="none")
-  
 
-plt2<-ggplot(y2, aes(x=fac, y=acde.Estimate, color=fac)) + 
-  ggtitle("Correlation between IC12 and IC13") + 
+
+plt2<-ggplot(y2, aes(x=fac, y=acde.Estimate, color=fac)) +
+  ggtitle("Correlation between IC12 and IC13") +
   theme(plot.title = element_text(size = 20, face = "bold"))+
   geom_point(position=position_dodge(), stat="identity",size=n0) +
   geom_errorbar(aes(ymin=acde.2.5., ymax=acde.97.5.),
-                size=1,    
+                size=1,
                 width=.5,
                 position=position_dodge(.9))+
   geom_hline(aes(yintercept = 0),  color = "grey")+
@@ -1064,17 +1064,17 @@ plt2<-ggplot(y2, aes(x=fac, y=acde.Estimate, color=fac)) +
   scale_x_discrete(name="Genetic component")+
   scale_y_continuous(name="Estimate")+
   theme(axis.title.x = element_text(size=20), axis.text.x  = element_text(size=20))+
-  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+ 
-  theme(legend.text = element_text(size=20))+ 
+  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+
+  theme(legend.text = element_text(size=20))+
   theme(legend.title = element_text(size=20, face="bold"))+
   theme(legend.position="none")
 
-plt3<-ggplot(y3, aes(x=fac, y=acde.Estimate, color=fac)) + 
-  ggtitle("Correlation between IC3 and IC6") + 
+plt3<-ggplot(y3, aes(x=fac, y=acde.Estimate, color=fac)) +
+  ggtitle("Correlation between IC3 and IC6") +
   theme(plot.title = element_text(size = 20, face = "bold"))+
   geom_point(position=position_dodge(), stat="identity",size=n0) +
   geom_errorbar(aes(ymin=acde.2.5., ymax=acde.97.5.),
-                size=1,    
+                size=1,
                 width=.5,
                 position=position_dodge(.9))+
   geom_hline(aes(yintercept = 0),  color = "grey")+
@@ -1083,13 +1083,13 @@ plt3<-ggplot(y3, aes(x=fac, y=acde.Estimate, color=fac)) +
   scale_x_discrete(name="Genetic component")+
   scale_y_continuous(name="Estimate")+
   theme(axis.title.x = element_text(size=20), axis.text.x  = element_text(size=20))+
-  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+ 
-  theme(legend.text = element_text(size=20))+ 
+  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+
+  theme(legend.text = element_text(size=20))+
   theme(legend.title = element_text(size=20, face="bold"))+
   theme(legend.position="none")
 
 
-acde<-ggarrange(plt0,plt1,plt2,plt3 + rremove("x.text"), 
+acde<-ggarrange(plt0,plt1,plt2,plt3 + rremove("x.text"),
           labels = c("A", "B","C","D"),
           ncol = 2, nrow = 2)
 acde
@@ -1102,10 +1102,11 @@ It appears that the genetic contribution in this sample to BMI and Age of onset 
 # Response to reviewers
 
 
+
 ```{r}
 summary(d4m$motion)
 motion_graph<-ggplot(d4m, aes(BMI, motion)) +
-  geom_point(shape=1) + 
+  geom_point(shape=1) +
   geom_smooth(method=lm,colour='black')+theme_classic()+scale_y_continuous(name="Frame to frame head motion summary")+
   scale_x_continuous(name="Body mass index (BMI)")+
   theme(axis.title.x = element_text( size=20),axis.text.x  = element_text(size=20))+
@@ -1157,7 +1158,7 @@ ddm$ZygosityGT <- factor(ddm$ZygosityGT)
 
 l0.0m<-lm(BMI~Age_in_Yrs+Race+Menstrual_AgeBegan+motion, data = d4m)
 summary(l0.0m)
-l0m <- twinlm(BMI ~ 1+Age_in_Yrs+Race+Menstrual_AgeBegan+motion, data=ddm,  DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)  
+l0m <- twinlm(BMI ~ 1+Age_in_Yrs+Race+Menstrual_AgeBegan+motion, data=ddm,  DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)
 summary(l0m)
 
 # AIC
@@ -1176,7 +1177,7 @@ levels(ddm$Race)
 ```{r}
 l1.0m<-lm(Menstrual_AgeBegan~Age_in_Yrs+Race+Menstrual_AgeBegan+motion, data = d5m)
 summary(l1.0m)
-l1m <- twinlm(Menstrual_AgeBegan ~ 1+Age_in_Yrs+Race+motion, data=ddm,  DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)  
+l1m <- twinlm(Menstrual_AgeBegan ~ 1+Age_in_Yrs+Race+motion, data=ddm,  DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)
 summary(l1m)
 
 # AIC
@@ -1187,7 +1188,7 @@ AICc(l1m,l1.0m)
 ```{r}
 l2.0m<-lm(V178 ~ BMI*Menstrual_AgeBegan+Age_in_Yrs+Race+motion, data = d5m)
 summary(l2.0m)
-l2m <- twinlm(V178 ~ 1+BMI*Menstrual_AgeBegan+Age_in_Yrs+Race+motion, data=ddm,  DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)  
+l2m <- twinlm(V178 ~ 1+BMI*Menstrual_AgeBegan+Age_in_Yrs+Race+motion, data=ddm,  DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)
 summary(l2m)
 
 # AIC
@@ -1198,7 +1199,7 @@ AICc(l2m,l2.0m)
 ```{r}
 l3.0m<-lm(V36 ~ BMI*Menstrual_AgeBegan+Age_in_Yrs+Race+motion, data = d5m)
 summary(l2.0m)
-l3m <- twinlm(V36 ~ 1+BMI*Menstrual_AgeBegan+Age_in_Yrs+Race+motion, data=ddm,  DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)  
+l3m <- twinlm(V36 ~ 1+BMI*Menstrual_AgeBegan+Age_in_Yrs+Race+motion, data=ddm,  DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)
 summary(l3m)
 
 # AIC
@@ -1209,7 +1210,7 @@ AICc(l3m,l3.0m)
 ```{r}
 l4.0m<-lm(motion ~ BMI*Menstrual_AgeBegan+Age_in_Yrs+Race, data = d5m)
 summary(l4.0m)
-l4m <- twinlm(motion ~ 1+BMI+Menstrual_AgeBegan+Age_in_Yrs+Race, data=d5m,  DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)  
+l4m <- twinlm(motion ~ 1+BMI+Menstrual_AgeBegan+Age_in_Yrs+Race, data=d5m,  DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)
 summary(l4m)
 
 # AIC
@@ -1242,14 +1243,14 @@ y4m$fac<-row.names(y4m)
 
 
 ```{r}
-pd <- position_dodge(0.1) 
+pd <- position_dodge(0.1)
 n0= 3
 
-plt0m<-ggplot(y0m, aes(x=fac, y=acde.Estimate, color=fac)) + 
-  ggtitle("BMI") + 
+plt0m<-ggplot(y0m, aes(x=fac, y=acde.Estimate, color=fac)) +
+  ggtitle("BMI") +
   geom_point(position=position_dodge(), stat="identity",size=n0) +
   geom_errorbar(aes(ymin=acde.2.5., ymax=acde.97.5.),
-                size=1,    
+                size=1,
                 width=.5,
                 position=position_dodge(.9))+
   geom_hline(aes(yintercept = 0),  color = "grey")+
@@ -1258,17 +1259,17 @@ plt0m<-ggplot(y0m, aes(x=fac, y=acde.Estimate, color=fac)) +
   scale_x_discrete(name="Genetic component")+
   scale_y_continuous(name="Estimate")+
   theme(axis.title.x = element_text(size=20), axis.text.x  = element_text(size=20))+
-  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+ 
-  theme(legend.text = element_text(size=20))+ 
+  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+
+  theme(legend.text = element_text(size=20))+
   theme(legend.title = element_text(size=20, face="bold"))+
   theme(legend.position="none")
-  
 
-plt1m<-ggplot(y1m, aes(x=fac, y=acde.Estimate, color=fac)) + 
-  ggtitle("Age at onset of menses") + 
+
+plt1m<-ggplot(y1m, aes(x=fac, y=acde.Estimate, color=fac)) +
+  ggtitle("Age at onset of menses") +
   geom_point(position=position_dodge(), stat="identity",size=n0) +
   geom_errorbar(aes(ymin=acde.2.5., ymax=acde.97.5.),
-                size=1,    
+                size=1,
                 width=.5,
                 position=position_dodge(.9))+
   geom_hline(aes(yintercept = 0),  color = "grey")+
@@ -1277,18 +1278,18 @@ plt1m<-ggplot(y1m, aes(x=fac, y=acde.Estimate, color=fac)) +
   scale_x_discrete(name="Genetic component")+
   scale_y_continuous(name="Estimate")+
   theme(axis.title.x = element_text(size=20), axis.text.x  = element_text(size=20))+
-  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+ 
-  theme(legend.text = element_text(size=20))+ 
+  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+
+  theme(legend.text = element_text(size=20))+
   theme(legend.title = element_text(size=20, face="bold"))+
   theme(legend.position="none")
-  
 
-plt2m<-ggplot(y2m, aes(x=fac, y=acde.Estimate, color=fac)) + 
-  ggtitle("Correlation between IC12 and IC13") + 
+
+plt2m<-ggplot(y2m, aes(x=fac, y=acde.Estimate, color=fac)) +
+  ggtitle("Correlation between IC12 and IC13") +
   theme(plot.title = element_text(size = 20, face = "bold"))+
   geom_point(position=position_dodge(), stat="identity",size=n0) +
   geom_errorbar(aes(ymin=acde.2.5., ymax=acde.97.5.),
-                size=1,    
+                size=1,
                 width=.5,
                 position=position_dodge(.9))+
   geom_hline(aes(yintercept = 0),  color = "grey")+
@@ -1297,17 +1298,17 @@ plt2m<-ggplot(y2m, aes(x=fac, y=acde.Estimate, color=fac)) +
   scale_x_discrete(name="Genetic component")+
   scale_y_continuous(name="Estimate")+
   theme(axis.title.x = element_text(size=20), axis.text.x  = element_text(size=20))+
-  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+ 
-  theme(legend.text = element_text(size=20))+ 
+  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+
+  theme(legend.text = element_text(size=20))+
   theme(legend.title = element_text(size=20, face="bold"))+
   theme(legend.position="none")
 
-plt3m<-ggplot(y3m, aes(x=fac, y=acde.Estimate, color=fac)) + 
-  ggtitle("Correlation between IC3 and IC6") + 
+plt3m<-ggplot(y3m, aes(x=fac, y=acde.Estimate, color=fac)) +
+  ggtitle("Correlation between IC3 and IC6") +
   theme(plot.title = element_text(size = 20, face = "bold"))+
   geom_point(position=position_dodge(), stat="identity",size=n0) +
   geom_errorbar(aes(ymin=acde.2.5., ymax=acde.97.5.),
-                size=1,    
+                size=1,
                 width=.5,
                 position=position_dodge(.9))+
   geom_hline(aes(yintercept = 0),  color = "grey")+
@@ -1316,17 +1317,17 @@ plt3m<-ggplot(y3m, aes(x=fac, y=acde.Estimate, color=fac)) +
   scale_x_discrete(name="Genetic component")+
   scale_y_continuous(name="Estimate")+
   theme(axis.title.x = element_text(size=20), axis.text.x  = element_text(size=20))+
-  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+ 
-  theme(legend.text = element_text(size=20))+ 
+  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+
+  theme(legend.text = element_text(size=20))+
   theme(legend.title = element_text(size=20, face="bold"))+
   theme(legend.position="none")
 
-plt4m<-ggplot(y4m, aes(x=fac, y=acde.Estimate, color=fac)) + 
-  ggtitle("Head motion parameters") + 
+plt4m<-ggplot(y4m, aes(x=fac, y=acde.Estimate, color=fac)) +
+  ggtitle("Head motion parameters") +
   theme(plot.title = element_text(size = 20, face = "bold"))+
   geom_point(position=position_dodge(), stat="identity",size=n0) +
   geom_errorbar(aes(ymin=acde.2.5., ymax=acde.97.5.),
-                size=1,    
+                size=1,
                 width=.5,
                 position=position_dodge(.9))+
   geom_hline(aes(yintercept = 0),  color = "grey")+
@@ -1335,12 +1336,12 @@ plt4m<-ggplot(y4m, aes(x=fac, y=acde.Estimate, color=fac)) +
   scale_x_discrete(name="Genetic component")+
   scale_y_continuous(name="Estimate")+
   theme(axis.title.x = element_text(size=20), axis.text.x  = element_text(size=20))+
-  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+ 
-  theme(legend.text = element_text(size=20))+ 
+  theme(axis.title.y = element_text(size=20), axis.text.y  = element_text(size=20))+
+  theme(legend.text = element_text(size=20))+
   theme(legend.title = element_text(size=20, face="bold"))+
   theme(legend.position="none")
 
-acdem<-ggarrange(plt0m,plt1m,plt2m,plt3m,plt4m + rremove("x.text"), 
+acdem<-ggarrange(plt0m,plt1m,plt2m,plt3m,plt4m + rremove("x.text"),
           labels = c("A", "B","C","D","E"),
           ncol = 2, nrow = 3)
 ```
@@ -1348,9 +1349,9 @@ acdem<-ggarrange(plt0m,plt1m,plt2m,plt3m,plt4m + rremove("x.text"),
 plt4m
 ```
 ```{r}
-names(glm)<-c("Subject", "group","BMI_C","AOM_C","int","race","age")
+#names(glm)<-c("Subject", "group","BMI_C","AOM_C","int","race","age")
 
-write.table(cbind(d4m$Subject,d4m$group,d4m$BMI_C,d4m$AOM_C,d4m$int,d4m$race,d4m$age,d4m$motion), "~/Google Drive/HCP_graph/1200/datasets/subs510.csv", sep=",")
+#write.table(cbind(d4m$Subject,d4m$group,d4m$BMI_C,d4m$AOM_C,d4m$int,d4m$race,d4m$age,d4m$motion), "~/Google Drive/HCP_graph/1200/datasets/subs510.csv", sep=",")
 ```
 
 
@@ -1427,12 +1428,12 @@ means.int
 pairs(means.int, adjust = "bon")
 pairs(means.el, adjust = "bon")
 ```
-# Summary 
+# Summary
 No difference in CC
 
 ```{r}
 describeBy(node_int6$cc, node_int6$early_late)
-cc6p0 <- ggplot(node_int6, aes(x=early_late, y=cc, color=early_late, fill=early_late)) + 
+cc6p0 <- ggplot(node_int6, aes(x=early_late, y=cc, color=early_late, fill=early_late)) +
   geom_violin()+ theme_classic()
 cc6p0
 ```
@@ -1440,7 +1441,7 @@ cc6p0
 
 ```{r}
 # Basic violin plot
-cc6p <- ggplot(node_int6, aes(x=module, y=cc, color=module, fill=module)) + 
+cc6p <- ggplot(node_int6, aes(x=module, y=cc, color=module, fill=module)) +
   geom_violin()+ facet_grid( . ~ early_late)+theme_classic()
 cc6p
 ```
@@ -1502,7 +1503,7 @@ No difference
 
 ```{r}
 # Basic violin plot
-cc3p <- ggplot(node_int3, aes(x=early_late, y=cc, color=early_late, fill=early_late)) + 
+cc3p <- ggplot(node_int3, aes(x=early_late, y=cc, color=early_late, fill=early_late)) +
   geom_violin()+ theme_classic()
 cc3p
 ```
@@ -1559,7 +1560,7 @@ means.int12
 pairs(means.int12, adjust = "bon")
 pairs(means.el12, adjust = "bon")
 ```
-# Summary 
+# Summary
 No difference in CC
 
 
@@ -1574,7 +1575,7 @@ pairs(means.btwint12, adjust = "bon")
 pairs(means.btwel12, adjust = "bon")
 ```
 # Summary
-No differences in btw centrality 
+No differences in btw centrality
 
 
 # IC 13
@@ -1616,7 +1617,7 @@ means.int13
 pairs(means.int13, adjust = "bon")
 pairs(means.el13, adjust = "bon")
 ```
-# Summary 
+# Summary
 No difference in CC
 
 
@@ -1672,12 +1673,12 @@ means.int2
 pairs(means.int2, adjust = "bon")
 pairs(means.el2, adjust = "bon")
 ```
-# Summary 
+# Summary
 Difference in clustering coefficient between early and late within module 0
 
 ```{r}
 # Basic violin plot
-cc2p <- ggplot(node_int2, aes(x=module, y=cc, color=early_late, fill=early_late)) + 
+cc2p <- ggplot(node_int2, aes(x=module, y=cc, color=early_late, fill=early_late)) +
   geom_violin()+ theme_classic()
 cc2p
 ```
@@ -1729,7 +1730,7 @@ pairs(means.el2, adjust = "bon")
 ```
 
 ```{r}
-p <- ggplot(node_int2_mod0, aes(x =early_late, y = node)) 
+p <- ggplot(node_int2_mod0, aes(x =early_late, y = node))
 p+geom_point( aes(size=cc,colour=early_late))+theme(panel.background=element_blank())
 ```
 
@@ -1774,7 +1775,7 @@ means.eLate  <- lsmeans(eLate, specs = "IC")
 summary(means.eLate)
 pairs(means.eLate, adjust = "bon")
 
-eAllp <- ggplot(edge_int, aes(x=IC, y=edge_weight, color=early_late, fill=early_late)) + 
+eAllp <- ggplot(edge_int, aes(x=IC, y=edge_weight, color=early_late, fill=early_late)) +
   geom_violin()+ theme_classic()
 eAllp
 ```
@@ -1795,7 +1796,7 @@ summary(freqin6e)
 
 summary(edge_int6$edge_weight)
 edge_int6_third<-subset(edge_int6,edge_int6$edge_weight >= 0.65)
-pe6 <- ggplot(edge_int6_third, aes(x =early_late, y = edgeID)) 
+pe6 <- ggplot(edge_int6_third, aes(x =early_late, y = edgeID))
 pe6+geom_point( aes(size=edge_weight,colour=early_late))+theme(panel.background=element_blank())
 
 ```
@@ -1810,7 +1811,7 @@ summary(means.e6)
 pairs(means.e6, adjust = "bon")
 
 # Basic violin plot
-e6p <- ggplot(edge_int6, aes(x=early_late, y=edge_weight, color=early_late, fill=early_late)) + 
+e6p <- ggplot(edge_int6, aes(x=early_late, y=edge_weight, color=early_late, fill=early_late)) +
   geom_violin()+ theme_classic()
 e6p
 ```
@@ -1828,7 +1829,7 @@ summary(freqin3e)
 
 summary(edge_int3$edge_weight)
 edge_int3_third<-subset(edge_int3,edge_int3$edge_weight >= 0.65)
-pe3 <- ggplot(edge_int3_third, aes(x =early_late, y = edgeID)) 
+pe3 <- ggplot(edge_int3_third, aes(x =early_late, y = edgeID))
 pe3+geom_point( aes(size=edge_weight,colour=early_late))+theme(panel.background=element_blank())
 ```
 
@@ -1842,7 +1843,7 @@ summary(means.e3)
 pairs(means.e3, adjust = "bon")
 
 # Basic violin plot
-e3p <- ggplot(edge_int3, aes(x=early_late, y=edge_weight, color=early_late, fill=early_late)) + 
+e3p <- ggplot(edge_int3, aes(x=early_late, y=edge_weight, color=early_late, fill=early_late)) +
   geom_violin()+ theme_classic()
 e3p
 ```
@@ -1858,7 +1859,7 @@ summary(freqin12e)
 
 summary(edge_int12$edge_weight)
 edge_int12_third<-subset(edge_int12,edge_int12$edge_weight >= 0.65)
-pe12 <- ggplot(edge_int12_third, aes(x =early_late, y = edgeID)) 
+pe12 <- ggplot(edge_int12_third, aes(x =early_late, y = edgeID))
 pe12+geom_point( aes(size=edge_weight,colour=early_late))+theme(panel.background=element_blank())
 ```
 
@@ -1872,7 +1873,7 @@ summary(means.e12)
 pairs(means.e12, adjust = "bon")
 
 # Basic violin plot
-e12p <- ggplot(edge_int12, aes(x=early_late, y=edge_weight, color=early_late, fill=early_late)) + 
+e12p <- ggplot(edge_int12, aes(x=early_late, y=edge_weight, color=early_late, fill=early_late)) +
   geom_violin()+ theme_classic()
 e12p
 ```
@@ -1890,7 +1891,7 @@ summary(freqin13e)
 
 summary(edge_int13$edge_weight)
 edge_int13_third<-subset(edge_int13,edge_int13$edge_weight >= 0.85)
-pe13 <- ggplot(edge_int13_third, aes(x =early_late, y = edgeID)) 
+pe13 <- ggplot(edge_int13_third, aes(x =early_late, y = edgeID))
 pe13+geom_point( aes(size=edge_weight,colour=early_late))+theme(panel.background=element_blank())
 ```
 
@@ -1904,7 +1905,7 @@ summary(means.e13)
 pairs(means.e13, adjust = "bon")
 
 # Basic violin plot
-e13p <- ggplot(edge_int13, aes(x=early_late, y=edge_weight, color=early_late, fill=early_late)) + 
+e13p <- ggplot(edge_int13, aes(x=early_late, y=edge_weight, color=early_late, fill=early_late)) +
   geom_violin()+ theme_classic()
 e13p
 ```
@@ -1918,7 +1919,7 @@ summary(freqin2e)
 
 summary(edge_int2$edge_weight)
 edge_int2_third<-subset(edge_int2,edge_int2$edge_weight >= 0.7)
-pe2 <- ggplot(edge_int2_third, aes(x =early_late, y = edgeID)) 
+pe2 <- ggplot(edge_int2_third, aes(x =early_late, y = edgeID))
 pe2+geom_point( aes(size=edge_weight,colour=early_late))+theme(panel.background=element_blank())
 ```
 
@@ -1931,7 +1932,7 @@ summary(means.e2)
 pairs(means.e2, adjust = "bon")
 
 # Basic violin plot
-e2p <- ggplot(edge_int2, aes(x=early_late, y=edge_weight, color=early_late, fill=early_late)) + 
+e2p <- ggplot(edge_int2, aes(x=early_late, y=edge_weight, color=early_late, fill=early_late)) +
   geom_violin()+ theme_classic()
 e2p
 ```
