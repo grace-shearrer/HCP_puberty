@@ -1977,6 +1977,7 @@ e2p
 ```
 
 
+<<<<<<< HEAD
 ```{r}
 n
 ```
@@ -1991,6 +1992,14 @@ cortest(e23,l23,n1=87,n2 =125, fisher = TRUE,cor=TRUE)
 
 
 
+=======
+
+# Repeated measures correlations
+
+```{r}
+
+```
+>>>>>>> master
 
 
 
