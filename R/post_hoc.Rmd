@@ -33,6 +33,7 @@ library(lmSupport)
 library(MuMIn)
 library(phia)
 library(nlme)
+library(rmcorr)
 #devtools::install_github("malcolmbarrett/ggdag")
 #devtools::install_github("kkholst/lava")
 #devtools::install_github("kkholst/mets")
@@ -1936,3 +1937,14 @@ e2p <- ggplot(edge_int2, aes(x=early_late, y=edge_weight, color=early_late, fill
   geom_violin()+ theme_classic()
 e2p
 ```
+
+
+
+# Repeated measures correlations
+
+```{r}
+
+```
+
+
+
