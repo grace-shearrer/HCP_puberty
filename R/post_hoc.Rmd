@@ -144,6 +144,44 @@ d4m$Race<-factor(d4m$Race, levels = c("White","Black or African Am.","Asian/Nat.
 levels(d4m$Race)
 ```
 
+#### Repeated measures corr data
+```{r}
+early23<-read.table("~/Google Drive/HCP_graph/1200/datasets/early_IC_2_3.csv", sep=",", header=TRUE)
+early36<-read.table("~/Google Drive/HCP_graph/1200/datasets/early_IC_3_6.csv", sep=",", header=TRUE)
+early1213<-read.table("~/Google Drive/HCP_graph/1200/datasets/early_IC_12_13.csv", sep=",", header=TRUE)
+```
+
+```{r}
+late23<-read.table("~/Google Drive/HCP_graph/1200/datasets/late_IC_2_3.csv", sep=",", header=TRUE)
+late36<-read.table("~/Google Drive/HCP_graph/1200/datasets/late_IC_3_6.csv", sep=",", header=TRUE)
+late1213<-read.table("~/Google Drive/HCP_graph/1200/datasets/late_IC_12_13.csv", sep=",", header=TRUE)
+```
+
+
+
+```{r}
+sapply(early23, class)
+drops <- c("high_low_2","high_low_3", "IC_3","IC_2")
+early23<-early23[ , !(names(early23) %in% drops)]
+late23<-late23[ , !(names(late23) %in% drops)]
+n<-names(late23)
+
+early23<-early23[ , !(names(early23) %in% n)]
+late23<-late23[ , !(names(late23) %in% n)]
+
+
+
+dim(early23)
+e23<-early23[,2:56]
+head(e23)
+dim(late23)
+l23<-late23[,2:54]
+head(l23)
+```
+
+
+
+
 
 ```{r}
 summary(d4m$V36)
@@ -157,7 +195,7 @@ names(node_df)
 ```
 The missing check is OK. Lines up with imaging data.
 
-
+# Basic Models
 ```{r}
 summary(d4$Age_in_Yrs)
 sd(d4$Age_in_Yrs)
@@ -1939,12 +1977,29 @@ e2p
 ```
 
 
+<<<<<<< HEAD
+```{r}
+n
+```
+
+
+### RM Corr
+```{r}
+cortest(e23,l23,n1=87,n2 =125, fisher = TRUE,cor=TRUE)
+```
+
+
+
+
+
+=======
 
 # Repeated measures correlations
 
 ```{r}
 
 ```
+>>>>>>> master
 
 
 
