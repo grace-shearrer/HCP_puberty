@@ -1472,9 +1472,11 @@ acdem<-ggarrange(plt0m,plt1m,plt2m,plt3m,plt4m + rremove("x.text"),
           labels = c("A", "B","C","D","E"),
           ncol = 2, nrow = 3)
 ```
+
 ```{r}
 plt4m
 ```
+
 ```{r}
 #names(glm)<-c("Subject", "group","BMI_C","AOM_C","int","race","age")
 
@@ -1492,6 +1494,16 @@ head(node_df)
 node_df$module<-as.factor(node_df$module)
 names(node_df)
 ```
+
+
+# Based off doi: 10.3389/neuro.11.037.2009
+## Intra-modular connectivity is measured by the normalized within-module degree
+## Inter-modular connectivity is measured by the participation coefficient (Pi)
+Pi will be close to 1 if the ith node is extensively linked to all other modules in the community and 0 if it is linked exclusively to other nodes in its own module.
+
+
+
+
 
 
 ```{r}
