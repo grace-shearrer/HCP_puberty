@@ -166,13 +166,13 @@ early23<-early23[ , !(names(early23) %in% drops)]
 late23<-late23[ , !(names(late23) %in% drops)]
 n<-names(late23)
 
-early23<-early23[ , !(names(early23) %in% n)]
-late23<-late23[ , !(names(late23) %in% n)]
+early23<-early23[ ,(names(early23) %in% n)]
+late23<-late23[ ,(names(late23) %in% n)]
 
 
 
 dim(early23)
-e23<-early23[,2:56]
+e23<-early23[,2:54]
 head(e23)
 dim(late23)
 l23<-late23[,2:54]
@@ -180,6 +180,17 @@ head(l23)
 ```
 
 
+```{r}
+x<-cor(l23, use="complete.obs")
+x[abs(x) < 0.3] <- 0
+dim(x)
+x
+y<-cor(e23, use="complete.obs")
+dim(y)
+y[abs(y) < 0.3] <- 0
+y
+cortest.mat(x,y,n1=125,n2 =87)
+```
 
 
 
@@ -731,6 +742,7 @@ summary(mCCr1) #SIGNIFICANT
 ### it appears that race only improves the model for Asian therefore we will test this without the asian population which is low (36)
 p.adjust(coef(summary(mCCr1))[, 4], method="BH", ad)
 ```
+
 ```{r plot of the crystalized cognition}
 ggplot(subset(d4, !is.na(AoM)), aes(BMI, CogCrystalComp_AgeAdj, color=AoM, group=AoM)) +
   geom_point(shape=1) +
@@ -741,33 +753,77 @@ ggplot(subset(d4, !is.na(AoM)), aes(BMI, CogCrystalComp_AgeAdj, color=AoM, group
 ```
 # HbA1c
 ```{r}
+summary(d4$HbA1C)
 mHb1<-lm(HbA1C~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
 summary(mHb1)
 ```
 
 # NIH Toolbox 2-minute Walk Endurance Test : Age-Adjusted Scale Score	Motor	Endurance (2 minute walk test)	Endurance_AgeAdj
 ```{r NIH Toolbox 2-minute Walk Endurance Test}
+summary(d4$Endurance_AgeAdj)
 mEn1<-lm(Endurance_AgeAdj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
 summary(mEn1)
 ```
 
 # NIH Toolbox Grip Strength Test: Age-Adjusted-Adjusted Scale Score	Motor	Strength (Grip Strength Dynamometry)	Strength_AgeAdj
 ```{r NIH Toolbox Grip Strength Test}
+summary(d4$Strength_Unadj)
 mSt1<-lm(Strength_AgeAdj ~ BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
 summary(mSt1)
 ```
 
 # NIH Toolbox Perceived Stress Survey: Unadjusted Scale Score	Emotion	Stress and Self Efficacy (Perceived Stress, Self-Efficacy)	PercStress_Unadj
 ```{r}
+summary(d4$PercStress_Unadj)
+
 mStress1<-lm(PercStress_Unadj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
 summary(mStress1)
 ```
 
 # Taste_AgeAdj
 ```{r}
+summary(d4$Taste_AgeAdj)
 mTaste1<-lm(Taste_AgeAdj~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
 summary(mTaste1)
+head(d4$V18)
 ```
+
+# POST HOC 
+
+# Depression 
+```{r}
+summary(d4$SSAGA_Depressive_Sx)
+mDepression1<-lm(SSAGA_Depressive_Ep~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
+summary(mDepression1)
+
+summary(d4$SSAGA_Depressive_Ep)
+mDepression2<-lm(SSAGA_Depressive_Sx~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
+summary(mDepression2)
+
+```
+
+```{r}
+summary(d4$NEOFAC_A)
+mNEO1<-lm(NEOFAC_A~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
+summary(mNEO1)
+
+summary(d4$NEOFAC_O)
+mNEO2<-lm(NEOFAC_O~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
+summary(mNEO2) #significant but wouldn't survive correction for multiple comparisons
+
+summary(d4$NEOFAC_C)
+mNEO3<-lm(NEOFAC_C~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
+summary(mNEO3)
+
+summary(d4$NEOFAC_N)
+mNEO4<-lm(NEOFAC_N~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
+summary(mNEO4)
+
+summary(d4$NEOFAC_E)
+mNEO5<-lm(NEOFAC_E~BMI*Menstrual_AgeBegan+Race+Age_in_Yrs, data = d4)
+summary(mNEO5)
+```
+
 
 ## Heritability
 Self-reported zygosity. Until the S1200 release this was the \Zygosity\" measure. The small number of subjects who do not have a value for this measure (blank) self reported as twins but did not self report their twin zygosity."
@@ -778,9 +834,10 @@ sig 3->6 == V36
 check 6 -> 3 == V78
 12->13 == V192
 check 13->12 == V178
+2->3 == V18
 ```{r}
 twins<-subset(d4 , d4$ZygosityGT %in% c('DZ', 'MZ'))
-myvars<-c("Family_ID","Subject","Menstrual_AgeBegan","BMI","ZygosityGT","Age_in_Yrs","Race","Gender","V36","V78","V178","V192")
+myvars<-c("Family_ID","Subject","Menstrual_AgeBegan","BMI","ZygosityGT","Age_in_Yrs","Race","Gender","V36","V78","V178","V192","V18")
 d5<-twins[myvars]
 d5$ZygosityGT<-factor(d5$ZygosityGT)
 d5$Race<-factor(d5$Race)
@@ -797,7 +854,7 @@ summary(d5$Race)
 d5$Race<-factor(d5$Race)
 
 
-d6 <- fast.reshape(d5, id="Family_ID",varying=c("BMI","Menstrual_AgeBegan","Subject","V36","V78","V178","V192"))
+d6 <- fast.reshape(d5, id="Family_ID",varying=c("BMI","Menstrual_AgeBegan","Subject","V36","V78","V178","V192","V18"))
 d6<-na.omit(d6)
 head(d6)
 ```
@@ -827,6 +884,10 @@ mz_V36<-subset(d6, ZygosityGT ==  "MZ"  )[,c("V361","V362")]
 p_V36_mz<-scatterdens(mz_V36)
 p_V36_mz
 
+mz_V18<-subset(d6, ZygosityGT ==  "MZ"  )[,c("V181","V182")]
+p_V18_mz<-scatterdens(mz_V18)
+p_V18_mz
+
 dz_bmi <- log(subset(d6, ZygosityGT ==  "DZ"  )[,c(  "BMI1"  ,  "BMI2"  )])
 p_bmi_dz<-scatterdens(dz_bmi)
 dz_aom<-subset(d6, ZygosityGT ==  "DZ"  )[,c("Menstrual_AgeBegan1","Menstrual_AgeBegan2")]
@@ -838,6 +899,10 @@ p_V178_dz<-scatterdens(dz_V178)
 dz_V36<-subset(d6, ZygosityGT ==  "DZ"  )[,c("V361","V362")]
 p_V36_dz<-scatterdens(dz_V36)
 p_V36_dz
+
+dz_V18<-subset(d6, ZygosityGT ==  "DZ"  )[,c("V181","V182")]
+p_V18_dz<-scatterdens(dz_V18)
+p_V18_dz
 
 pBMI<-ggarrange(p_bmi_mz,p_bmi_dz + rremove("x.text"),
           labels = c("A", "B"),
@@ -852,6 +917,10 @@ pV178<-ggarrange(p_V178_mz,p_V178_dz + rremove("x.text"),
           ncol = 2, nrow = 1)
 
 pV36<-ggarrange(p_V36_mz,p_V36_dz + rremove("x.text"),
+          labels = c("A", "B"),
+          ncol = 2, nrow = 1)
+
+pV18<-ggarrange(p_V18_mz,p_V18_dz + rremove("x.text"),
           labels = c("A", "B"),
           ncol = 2, nrow = 1)
 
@@ -1178,11 +1247,11 @@ confint(mm4)
 ### Heritability with motion correction
 ```{r}
 twins<-subset(d4m , d4$ZygosityGT %in% c('DZ', 'MZ'))
-myvars<-c("Family_ID","Subject","Menstrual_AgeBegan","BMI","ZygosityGT","Age_in_Yrs","Race","Gender","V36","V78","V178","V192", "motion")
+myvars<-c("Family_ID","Subject","Menstrual_AgeBegan","BMI","ZygosityGT","Age_in_Yrs","Race","Gender","V36","V78","V178","V192","V18", "motion")
 d5m<-twins[myvars]
 d5m$ZygosityGT<-factor(d5m$ZygosityGT)
 d5m$Race<-factor(d5m$Race)
-d6m <- fast.reshape(d5m, id="Family_ID",varying=c("BMI","Menstrual_AgeBegan","Subject","V36","V78","V178","V192", "motion"))
+d6m <- fast.reshape(d5m, id="Family_ID",varying=c("BMI","Menstrual_AgeBegan","Subject","V36","V78","V178","V192", "V18","motion"))
 d6m<-na.omit(d6m)
 ```
 
@@ -1214,9 +1283,9 @@ levels(ddm$Race)
 
 
 ```{r}
-l1.0m<-lm(Menstrual_AgeBegan~Age_in_Yrs+Race+Menstrual_AgeBegan+motion, data = d5m)
+l1.0m<-lm(Menstrual_AgeBegan~BMI+Age_in_Yrs+Race+motion, data = d5m)
 summary(l1.0m)
-l1m <- twinlm(Menstrual_AgeBegan ~ 1+Age_in_Yrs+Race+motion, data=ddm,  DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)
+l1m <- twinlm(Menstrual_AgeBegan ~ 1+BMI++Age_in_Yrs+Race+motion, data=ddm,  DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)
 summary(l1m)
 
 # AIC
@@ -1245,6 +1314,25 @@ summary(l3m)
 AIC(l3.0m)
 AICc(l3m,l3.0m)
 ```
+```{r}
+l3m$model
+```
+
+
+```{r}
+l5.0m<-lm(V18 ~ BMI*Menstrual_AgeBegan+Age_in_Yrs+Race+motion, data = d5m)
+summary(l5.0m)
+l5m <- twinlm(V18 ~ 1+BMI*Menstrual_AgeBegan+Age_in_Yrs+Race+motion, data=ddm,  DZ= "DZ"  , zyg=  "ZygosityGT"  , id="Family_ID", type="aced", missing = T)
+summary(l5m)
+
+# AIC
+AIC(l5.0m)
+AICc(l5m,l5.0m)
+```
+
+
+
+
 
 ```{r}
 l4.0m<-lm(motion ~ BMI*Menstrual_AgeBegan+Age_in_Yrs+Race, data = d5m)
@@ -1977,7 +2065,6 @@ e2p
 ```
 
 
-<<<<<<< HEAD
 ```{r}
 n
 ```
@@ -1992,14 +2079,6 @@ cortest(e23,l23,n1=87,n2 =125, fisher = TRUE,cor=TRUE)
 
 
 
-=======
-
-# Repeated measures correlations
-
-```{r}
-
-```
->>>>>>> master
 
 
 
