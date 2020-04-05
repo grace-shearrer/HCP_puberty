@@ -1488,8 +1488,8 @@ plt4m
 
 
 ```{r}
-node_df<-read.table("~/Google Drive/HCP_graph/1200/datasets/early_late_nodes.csv", header=TRUE, sep=",")
-edge_df<-read.table("~/Google Drive/HCP_graph/1200/datasets/early_late_edges.csv", header = TRUE, sep=",")
+node_df<-read.table("~/Google Drive/HCP_graph/1200/datasets/early_late_nodes_new.csv", header=TRUE, sep=",")
+edge_df<-read.table("~/Google Drive/HCP_graph/1200/datasets/early_late_edges_new.csv", header = TRUE, sep=",")
 head(node_df)
 node_df$module<-as.factor(node_df$module)
 names(node_df)
@@ -1500,8 +1500,6 @@ names(node_df)
 ## Intra-modular connectivity is measured by the normalized within-module degree
 ## Inter-modular connectivity is measured by the participation coefficient (Pi)
 Pi will be close to 1 if the ith node is extensively linked to all other modules in the community and 0 if it is linked exclusively to other nodes in its own module.
-
-
 
 
 
@@ -1586,6 +1584,25 @@ cc6p
 ```
 
 ```{r}
+PC6<-lm(PC~module*early_late, data=node_int6)
+summary(PC6)
+
+means.mod <- lsmeans(PC6, specs = "module")
+means.el  <- lsmeans(PC6, specs = "early_late")
+summary(means.el)
+means.int <- lsmeans(PC6, specs = c("module", "early_late"))
+means.int
+pairs(means.int, adjust = "bon")
+pairs(means.el, adjust = "bon")
+```
+```{r}
+# Basic violin plot
+PC6p <- ggplot(node_int6, aes(x=module, y=PC, color=module, fill=module)) +
+  geom_violin()+ facet_grid( . ~ early_late)+theme_classic()
+PC6p
+```
+
+```{r}
 btw6<-lm(btw~module*early_late, data=node_int6)
 
 means.btwmod <- lsmeans(btw6, specs = "module")
@@ -1647,6 +1664,18 @@ cc3p <- ggplot(node_int3, aes(x=early_late, y=cc, color=early_late, fill=early_l
 cc3p
 ```
 
+```{r}
+PC3<-lm(PC~module*early_late, data=node_int3)
+summary(PC3)
+
+means.mod <- lsmeans(PC3, specs = "module")
+means.el  <- lsmeans(PC3, specs = "early_late")
+summary(means.el)
+means.int <- lsmeans(PC3, specs = c("module", "early_late"))
+means.int
+pairs(means.int, adjust = "bon")
+pairs(means.el, adjust = "bon")
+```
 
 
 ```{r}
