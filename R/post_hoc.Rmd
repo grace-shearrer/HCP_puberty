@@ -2241,7 +2241,14 @@ mytable <- xtabs(~node+module, data=IC13_early)
 margin.table(mytable, 2)
 ```
 
-
+```{r}
+IC13_late<-subset(IC13, IC13$early_late == "late")
+summary(IC13_late$module)
+head(IC13_late)
+describeBy(IC13_late, IC13_late$module)
+mytable <- xtabs(~node+module, data=IC13_late)
+margin.table(mytable, 2)
+```
 
 
 
