@@ -2145,14 +2145,49 @@ n
 cortest(e23,l23,n1=87,n2 =125, fisher = TRUE,cor=TRUE)
 ```
 
+
 ```{r}
 node_int<-subset(node_df, node_df$group == "int")
 names(node_int)
+```
+
+The hubness of a node can be defined by its within-module  degree: 
+If a given node  i  has a value of  
+zi  >  2.5. It is classified as  a hub, otherwise as a non-hub.
+
+```{r}
+node_int$hubbness[node_int$zDegree >= 2.5]<-"hub"
+node_int$hubbness[node_int$zDegree < 2.5]<-"non_hub"
+summary(node_int$hubbness)
+```
+# No hubs
+
+For hubs, 0  <   Pi  <  0.30    provincial hub , 
+0.30  <   Pi  <  0.75   connector hub , and 
+0.75  <   Pi  <  1.0 is a  kinless hub .
+
+For non-hubs, if a given node  has value 
+0  <   Pi  <  0.05,  ultra peripheral   node , 
+0.05  <   Pi  <  0.62  peripheral  node 
+0.62  <   Pi  <  0.80  connector node  
+0.80  <   Pi  <  1.0    kinless node . 
+
+```{r}
+node_int$node_type[node_int$PC > 0 & node_int$PC <= 0.05 ]<-"ultra"
+node_int$node_type[node_int$PC > 0.05 & node_int$PC <= 0.62 ]<-"peripheral"
+node_int$node_type[node_int$PC > 0.62 & node_int$PC <= 0.8 ]<-"connector"
+node_int$node_type[node_int$PC > 0.8 & node_int$PC <= 1 ]<-"kinless"
+summary(as.factor(node_int$node_type))
+```
+
+
+```{r}
 node_int$module<-as.factor(node_int$module)
 node_int$group<-as.factor(node_int$group)
 node_int$early_late<-as.factor(node_int$early_late)
 node_int$node<-as.factor(node_int$node)
-
+node_int$node_type<-as.factor(node_int$node_type)
+  
 summary(node_int$IC)
 IC2<-subset(node_int, node_int$IC == "IC2")
 IC3<-subset(node_int, node_int$IC == "IC3")
@@ -2167,7 +2202,8 @@ summary(IC2$module)
 IC2_early<-subset(IC2, IC2$early_late == "early")
 describeBy(IC2_early, IC2_early$module)
 describeBy(IC2, IC2$group=="early")
-mytable <- xtabs(~node+module, data=IC2_early)
+mytable <- xtabs(~node_type+module, data=IC2_early)
+mytable
 margin.table(mytable, 2)
 ```
 
@@ -2176,7 +2212,7 @@ margin.table(mytable, 2)
 summary(IC2$module)
 IC2_late<-subset(IC2, IC2$early_late == "late")
 describeBy(IC2_late, IC2_late$module)
-mytable <- xtabs(~node+module, data=IC2_late)
+mytable <- xtabs(~node_type+module, data=IC2_late)
 mytable
 margin.table(mytable, 2)
 ```
@@ -2184,24 +2220,24 @@ margin.table(mytable, 2)
 summary(IC3$module)
 IC3_early<-subset(IC3, IC3$early_late == "early")
 describeBy(IC3_early, IC3_early$module)
-mytable <- xtabs(~node+module, data=IC3_early)
-margin.table(mytable, 2)
+mytable <- xtabs(~node_type+module, data=IC3_early)
+mytable
 ```
 ```{r}
 summary(IC3_late$module)
 IC3_late<-subset(IC3, IC3$early_late == "late")
 head(IC3_late)
 describeBy(IC3_late, IC3_late$module)
-mytable <- xtabs(~node+module, data=IC3_3)
-margin.table(mytable, 2)
+mytable <- xtabs(~node_type+module, data=IC3_late)
+mytable
 ```
 ```{r}
 summary(IC6_early$module)
 IC6_early<-subset(IC6, IC6$early_late == "early")
 head(IC6_early)
 describeBy(IC6_early, IC6_early$module)
-mytable <- xtabs(~node+module, data=IC6_early)
-margin.table(mytable, 2)
+mytable <- xtabs(~node_type+module, data=IC6_early)
+mytable
 ```
 
 
@@ -2210,16 +2246,16 @@ summary(IC6_late$module)
 IC6_late<-subset(IC6, IC6$early_late == "late")
 head(IC6_late)
 describeBy(IC6_late, IC6_late$module)
-mytable <- xtabs(~node+module, data=IC6_late)
-margin.table(mytable, 2)
+mytable <- xtabs(~node_type+module, data=IC6_late)
+mytable
 ```
 ```{r}
 summary(IC12_early$module)
 IC12_early<-subset(IC12, IC12$early_late == "early")
 head(IC12_early)
 describeBy(IC12_early, IC12_early$module)
-mytable <- xtabs(~node+module, data=IC12_early)
-margin.table(mytable, 2)
+mytable <- xtabs(~node_type+module, data=IC12_early)
+mytable
 ```
 
 
@@ -2228,8 +2264,8 @@ summary(IC12_late$module)
 IC12_late<-subset(IC12, IC12$early_late == "late")
 head(IC12_late)
 describeBy(IC12_late, IC12_late$module)
-mytable <- xtabs(~node+module, data=IC12_late)
-margin.table(mytable, 2)
+mytable <- xtabs(~node_type+module, data=IC12_late)
+mytable
 ```
 
 ```{r}
@@ -2237,8 +2273,8 @@ IC13_early<-subset(IC13, IC13$early_late == "early")
 summary(IC13_early$module)
 head(IC13_early)
 describeBy(IC13_early, IC13_early$module)
-mytable <- xtabs(~node+module, data=IC13_early)
-margin.table(mytable, 2)
+mytable <- xtabs(~node_type+module, data=IC13_early)
+mytable
 ```
 
 ```{r}
@@ -2246,10 +2282,17 @@ IC13_late<-subset(IC13, IC13$early_late == "late")
 summary(IC13_late$module)
 head(IC13_late)
 describeBy(IC13_late, IC13_late$module)
-mytable <- xtabs(~node+module, data=IC13_late)
-margin.table(mytable, 2)
+mytable <- xtabs(~node_type+module, data=IC13_late)
+mytable
 ```
 
-
+```{r}
+conns<-subset(node_int, node_int$node_type == "connector")
+conns$module<-factor(conns$module)
+mytable <- xtabs(~early_late+module, data=conns)
+summary(mytable)
+mytable
+subset(conns, conns$early_late == "early" & conns$module == 3)
+```
 
 
